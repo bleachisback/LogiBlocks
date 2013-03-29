@@ -1,0 +1,17 @@
+name: LogiBlocks
+main: plugin.bleachisback.LogiBlocks.LogiBlocksMain
+version: 1.01
+commands:
+    command:
+        description: Additional command block commands
+        usage: /<command> <modifier> [args]...
+        aliases: c
+    logicif:
+        description: If the given flag returns true, executes one command, otherwise it executes the other.
+        usage: "/<command> <flag> [args] ? [command if true] : [command if false]"
+        aliases: if
+    phantom:
+        permission: c.hidden.phantom
+permissions:
+    c.hidden.phantom:
+        default: false
