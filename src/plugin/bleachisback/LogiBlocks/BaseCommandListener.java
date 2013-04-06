@@ -1,6 +1,9 @@
 package plugin.bleachisback.LogiBlocks;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +26,14 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
+
+import com.thevoxelbox.voxelsniper.SnipeData;
+import com.thevoxelbox.voxelsniper.Sniper;
+import com.thevoxelbox.voxelsniper.SniperBrushes;
+import com.thevoxelbox.voxelsniper.brush.Brush;
+import com.thevoxelbox.voxelsniper.brush.perform.PerformBrush;
+import com.thevoxelbox.voxelsniper.brush.perform.PerformerE;
+import com.thevoxelbox.voxelsniper.brush.perform.vPerformer;
 
 public class BaseCommandListener implements CommandExecutor
 {
@@ -51,6 +62,8 @@ public class BaseCommandListener implements CommandExecutor
 		minArgs.put("sf", 3);
 		minArgs.put("inventory", 2);
 		minArgs.put("inv", 2);
+		minArgs.put("voxelsniper", 1);
+		minArgs.put("vs", 1);
 		
 		inventorySubs.put("add",1);
 		inventorySubs.put("remove",1);
@@ -474,6 +487,208 @@ public class BaseCommandListener implements CommandExecutor
 				}
 				break;
 				//end inventory
+			case "voxelsniper":
+			case "vs":
+				//Sets where the brush should be used at, should by the first arg after sub-command
+				Location location=LogiBlocksMain.parseLocation(args[1], block.getBlock().getRelative(BlockFace.UP).getLocation());
+				//Default brush attributes
+				String brushName="snipe";
+				String performer="m";
+				int brushSize=3;
+				int voxelId=0;
+				int replaceId=0;
+				byte data=0;
+				byte replaceData=0;
+				int voxelHeight=1;
+				
+				//goes through every following arg and parses the attributes
+				//Attributes are named similarly to their voxelsniper command, meaning voxelId is v and replaceId is vr
+				for(int i=2; i<args.length; i++)
+				{
+					if(!args[i].contains("="))
+					{
+						continue;
+					}
+					
+					args[i]=args[i].replace("-", "");	
+					String att=args[i].substring(args[i].indexOf('=')+1,args[i].length());
+					
+					switch(args[i].substring(0, args[i].indexOf('=')))
+					{
+						case "b":
+							//Check if brush exists
+							if(SniperBrushes.hasBrush(att))
+							{
+								brushName=att;
+							}
+							//If not, try to set brush size instead
+							else
+							{
+								try
+								{
+									brushSize=Integer.parseInt(att);
+								}
+								catch(NumberFormatException e)
+								{
+								}
+							}
+							break;
+						case "p":
+							//Check if performer exists
+							//Only works with short names
+							if(PerformerE.has(att))
+							{
+								performer=att;
+							}
+							break;
+						case "v":
+							try
+							{
+								voxelId=Integer.parseInt(att);
+							}
+							catch(NumberFormatException e)
+							{								
+							}
+							break;
+						case "vr":
+							try
+							{
+								replaceId=Integer.parseInt(att);
+							}
+							catch(NumberFormatException e)
+							{								
+							}
+							break;
+						case "vi":
+							try
+							{
+								data=Byte.parseByte(att);
+							}
+							catch(NumberFormatException e)
+							{								
+							}
+							break;
+						case "vir":
+							try
+							{
+								replaceData=Byte.parseByte(att);
+							}
+							catch(NumberFormatException e)
+							{								
+							}
+							break;
+						case "vh":
+							try
+							{
+								voxelHeight=Integer.parseInt(att);
+							}
+							catch(NumberFormatException e)
+							{								
+							}
+							break;
+					}					
+				}
+				//end for
+				//Intanciates a new SnipeData object from VoxelSniper
+				//null because there is no Player
+				SnipeData snipeData=new SnipeData(new Sniper());
+				snipeData.setBrushSize(brushSize);
+				snipeData.setData(data);
+				snipeData.setReplaceData(replaceData);
+				snipeData.setReplaceId(replaceId);
+				snipeData.setVoxelHeight(voxelHeight);
+				snipeData.setVoxelId(voxelId);
+				//snipeData.setVoxelMessage(new Message(snipeData));
+				
+				try 
+				{
+					//gets a VoxelSniper brush instance, and sets the variables to be able to run
+					Brush brush=(Brush) SniperBrushes.getBrushInstance(brushName);
+					
+					Field field=Brush.class.getDeclaredField("blockPositionX");					
+					field.setAccessible(true);
+					field.set(brush, location.getBlockX());
+
+					field=Brush.class.getDeclaredField("blockPositionY");					
+					field.setAccessible(true);
+					field.set(brush, location.getBlockY());
+					
+					field=Brush.class.getDeclaredField("blockPositionZ");					
+					field.setAccessible(true);
+					field.set(brush, location.getBlockZ());
+					
+					field=Brush.class.getDeclaredField("world");					
+					field.setAccessible(true);
+					field.set(brush, location.getWorld());
+					
+					field=Brush.class.getDeclaredField("targetBlock");					
+					field.setAccessible(true);
+					field.set(brush, location.getBlock());
+					
+					if(brush instanceof PerformBrush)
+					{						
+						vPerformer vperformer=PerformerE.getPerformer(performer);
+						
+						field=PerformBrush.class.getDeclaredField("current");
+						field.setAccessible(true);
+						field.set(brush, vperformer);
+						
+						field=vPerformer.class.getDeclaredField("w");
+						field.setAccessible(true);
+						field.set(vperformer, location.getWorld());
+						
+						for(Field testField:vperformer.getClass().getDeclaredFields())
+						{
+							switch(testField.getName())
+							{
+								case "i":
+									testField.setAccessible(true);
+									testField.set(vperformer, voxelId);
+									break;
+								case "d":
+									testField.setAccessible(true);
+									testField.set(vperformer, data);
+									break;
+								case "ir":
+									testField.setAccessible(true);
+									testField.set(vperformer, replaceId);
+									break;
+								case "dr":
+									testField.setAccessible(true);
+									testField.set(vperformer, replaceData);
+									break;
+							}
+						}
+						
+						vperformer.setUndo();
+					}
+					
+					Method method=Brush.class.getDeclaredMethod("arrow", SnipeData.class);
+					method.setAccessible(true);
+					method.invoke(brush, snipeData);
+				} 
+				catch (NoSuchMethodException e) 
+				{
+					e.printStackTrace();
+				}
+				catch (NoSuchFieldException e) 
+				{
+					e.printStackTrace();
+				} 
+				catch (SecurityException e) 
+				{
+					e.printStackTrace();
+				}
+				catch (InvocationTargetException e) 
+				{
+					e.printStackTrace();
+				}
+				catch (IllegalAccessException e) 
+				{
+					e.printStackTrace();
+				}
+				break;
+				//end voxelsniper
 		}
 		return false;
 	}
