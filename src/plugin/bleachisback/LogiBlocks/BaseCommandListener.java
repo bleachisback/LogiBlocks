@@ -47,23 +47,43 @@ public class BaseCommandListener implements CommandExecutor
 		this.plugin=plugin;
 		this.server=plugin.getServer();
 		minArgs.put("eject", 2);
-		minArgs.put("ej", 2);
 		minArgs.put("kill", 2);
 		minArgs.put("accelerate", 5);
-		minArgs.put("acc", 5);
 		minArgs.put("delay", 3);
 		minArgs.put("redstone", 2);
-		minArgs.put("rs", 2);
 		minArgs.put("explode", 5);
 		minArgs.put("equip", 4);
 		minArgs.put("repeat", 4);
-		minArgs.put("rp", 4);
 		minArgs.put("setflag", 3);
-		minArgs.put("sf", 3);
 		minArgs.put("inventory", 2);
-		minArgs.put("inv", 2);
 		minArgs.put("voxelsniper", 1);
-		minArgs.put("vs", 1);
+		
+		//Load aliases and disabled commands from config
+		for(String name:minArgs.keySet().toArray(new String[0]))
+		{
+			if(plugin.config.contains("commands."+name))
+			{
+				if(plugin.config.getBoolean("commands."+name+".enabled"))
+				{
+					for(String alias:plugin.config.getStringList("commands."+name+".aliases"))
+					{
+						minArgs.put(alias, minArgs.get(name));
+					}
+				}
+				else
+				{
+					minArgs.remove(name);
+				}
+			}
+			else
+			{
+				plugin.log.info("No profile detected for command: "+name);
+				plugin.config.set("commands."+name+".enabled", true);
+				plugin.config.set("commands."+name+".aliases", "");
+				plugin.saveConfig();
+				plugin.log.info("Default profile for "+name+" created");
+			}
+		}
 		
 		inventorySubs.put("add",1);
 		inventorySubs.put("remove",1);

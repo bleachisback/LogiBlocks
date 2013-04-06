@@ -16,6 +16,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -33,12 +34,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class LogiBlocksMain extends JavaPlugin implements FlagListener
 {
-	private Logger log;
+	protected Logger log;
 	private Server server;
 	private PluginDescriptionFile desc;
 	//private PluginManager pm;
 	
 	protected FileConfiguration flagConfig;
+	protected Configuration config;
 	
 	protected static File flagFile;
 	protected HashMap<String, FlagListener> flags= new HashMap<String, FlagListener>();	
@@ -53,6 +55,9 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		
 		flagFile=new File(getDataFolder(), "flags");		
 		flagConfig=YamlConfiguration.loadConfiguration(flagFile);
+		
+		saveDefaultConfig();
+		config=getConfig();
 		
 		getCommand("command").setExecutor(new BaseCommandListener(this));
 		getCommand("logicif").setExecutor(new LogiCommandListener(this));

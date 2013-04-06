@@ -1,0 +1,42 @@
+commands:
+    eject:
+        enabled: true
+        aliases:
+        - ej
+    kill:
+        enabled: true
+        aliases:
+    accelerate:
+        enabled: true
+        aliases:
+        - acc
+    delay:
+        enabled: true
+        aliases:
+    redstone:
+        enabled: true
+        aliases:
+        - rs
+    explode:
+        enabled: true
+        aliases:
+    equip:
+        enabled: true
+        aliases:
+    repeat:
+        enabled: true
+        aliases:
+        - re
+        - rp
+    setflag:
+        enabled: true
+        aliases:
+        - sf
+    inventory:
+        enabled: true
+        aliases:
+        - inv
+    voxelsniper:
+        enabled: true
+        aliases:
+        - vs
