@@ -590,7 +590,6 @@ public class BaseCommandListener implements CommandExecutor
 				}
 				//end for
 				//Intanciates a new SnipeData object from VoxelSniper
-				//null because there is no Player
 				SnipeData snipeData=new SnipeData(new Sniper());
 				snipeData.setBrushSize(brushSize);
 				snipeData.setData(data);
@@ -598,7 +597,6 @@ public class BaseCommandListener implements CommandExecutor
 				snipeData.setReplaceId(replaceId);
 				snipeData.setVoxelHeight(voxelHeight);
 				snipeData.setVoxelId(voxelId);
-				//snipeData.setVoxelMessage(new Message(snipeData));
 				
 				try 
 				{
@@ -649,7 +647,7 @@ public class BaseCommandListener implements CommandExecutor
 									testField.setAccessible(true);
 									testField.set(vperformer, data);
 									break;
-								case "ir":
+								case "r":
 									testField.setAccessible(true);
 									testField.set(vperformer, replaceId);
 									break;
@@ -663,6 +661,7 @@ public class BaseCommandListener implements CommandExecutor
 						vperformer.setUndo();
 					}
 					
+					//Runs the brush
 					Method method=Brush.class.getDeclaredMethod("arrow", SnipeData.class);
 					method.setAccessible(true);
 					method.invoke(brush, snipeData);
