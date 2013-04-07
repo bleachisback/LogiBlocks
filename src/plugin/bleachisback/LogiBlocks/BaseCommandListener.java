@@ -56,7 +56,12 @@ public class BaseCommandListener implements CommandExecutor
 		minArgs.put("repeat", 4);
 		minArgs.put("setflag", 3);
 		minArgs.put("inventory", 2);
-		minArgs.put("voxelsniper", 1);
+		
+		if(Bukkit.getPluginManager().getPlugin("VoxelSniper")!=null)
+		{
+			plugin.log.info("VoxelSniper detected - adding support");
+			minArgs.put("voxelsniper", 1);
+		}
 		
 		//Load aliases and disabled commands from config
 		for(String name:minArgs.keySet().toArray(new String[0]))
