@@ -1,6 +1,6 @@
 name: LogiBlocks
 main: plugin.bleachisback.LogiBlocks.LogiBlocksMain
-version: 1.01
+version: 1.02
 commands:
     command:
         description: Additional command block commands
@@ -13,5 +13,8 @@ commands:
     phantom:
         permission: c.hidden.phantom
 permissions:
+    c.craft:
+        default: op
+        description: Allows user to craft command blocks
     c.hidden.phantom:
         default: false

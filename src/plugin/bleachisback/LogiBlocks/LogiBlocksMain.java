@@ -27,9 +27,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class LogiBlocksMain extends JavaPlugin implements FlagListener
@@ -37,7 +39,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 	protected Logger log;
 	private Server server;
 	private PluginDescriptionFile desc;
-	//private PluginManager pm;
+	private PluginManager pm;
 	
 	protected FileConfiguration flagConfig;
 	protected Configuration config;
@@ -51,7 +53,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		server=getServer();
 		log=getLogger();
 		desc=getDescription();
-		//pm=server.getPluginManager();
+		pm=server.getPluginManager();
 		
 		flagFile=new File(getDataFolder(), "flags");		
 		flagConfig=YamlConfiguration.loadConfiguration(flagFile);
@@ -61,6 +63,8 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		
 		getCommand("command").setExecutor(new BaseCommandListener(this));
 		getCommand("logicif").setExecutor(new LogiCommandListener(this));
+		
+		pm.registerEvents(new LogiBlocksCraftListener(this), this);
 		
 		registerFlag("getflag",this);
 		registerFlag("hasequip",this);
@@ -72,6 +76,8 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		inventorySubs.put("isfull",0);
 		inventorySubs.put("isempty",0);
 		inventorySubs.put("slot",2);
+		
+		setupRecipe();
 		
 		log.info(desc.getFullName()+" is enabled");
 	}
@@ -100,6 +106,55 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 				break;				
 		}
 		return false;
+	}
+	
+	private char[][] getchar={{'a','b','c'},{'d','e','f'},{'g','h','i'}};
+	private void setupRecipe()
+	{
+		Material[][] mats=new Material[3][3];
+		HashMap<Material,Character> chars=new HashMap<Material,Character>();
+		for(int i=0;i<3;i++)
+		{
+			String[] units=config.getStringList("crafting-recipe").get(i).replace(" ","").split(",");
+			for(int j=0;j<3;j++)
+			{
+				Material material=Material.matchMaterial(units[j]);
+				if(material==null)
+				{
+					material=Material.getMaterial(Integer.parseInt(units[j]));
+				}
+				mats[i][j]=material;
+				if(!chars.containsKey(material))
+				{
+					chars.put(material,getchar[i][j]);
+				}
+			}
+		}		
+		ItemStack result=new ItemStack(Material.COMMAND,1);
+		ShapedRecipe recipe=new ShapedRecipe(result);
+		String[] shape=new String[3];
+		for(int i=0;i<3;i++)
+		{
+			shape[i]="";
+			for(int j=0;j<3;j++)
+			{
+				Material material=mats[i][j];
+				shape[i]=shape[i]+chars.get(material).toString();
+			}
+		}
+		recipe.shape(shape);
+		for(int i=0;i<3;i++)
+		{
+			for(int j=0;j<3;j++)
+			{
+				Material material=mats[i][j];
+				if(material!=Material.AIR)
+				{
+					recipe.setIngredient(chars.get(material), material);
+				}				
+			}
+		}		
+		server.addRecipe(recipe);
 	}
 	
 	public boolean onFlag(String flag, String[] args, BlockCommandSender sender) throws FlagFailureException

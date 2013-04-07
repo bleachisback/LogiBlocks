@@ -1,3 +1,7 @@
+crafting-recipe:
+- 266,331,266
+- 331,264,331
+- 266,331,266
 commands:
     eject:
         enabled: true
