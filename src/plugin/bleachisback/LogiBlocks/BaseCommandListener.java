@@ -113,26 +113,10 @@ public class BaseCommandListener implements CommandExecutor
 		}
 		BlockCommandSender block=(BlockCommandSender) sender;
 		
-		//Debug code
-		/*String trace="Before filter: ";
-		for(String arg:args)
-		{
-			trace=trace+arg+" ";
-		}
-		trace(trace);*/
-		
 		if(!LogiBlocksMain.filter(args, block, cmd))
 		{
 			return false;
 		}
-		
-		//Debug code
-		/*trace="After filter: ";
-		for(String arg:args)
-		{
-			trace=trace+arg+" ";
-		}
-		trace(trace);*/
 		
 		if(!minArgs.containsKey(args[0]))
 		{
@@ -614,7 +598,7 @@ public class BaseCommandListener implements CommandExecutor
 					}					
 				}
 				//end for
-				//Intanciates a new SnipeData object from VoxelSniper
+				//Instantiates a new SnipeData object from VoxelSniper
 				SnipeData snipeData=new SnipeData(new Sniper());
 				snipeData.setBrushSize(brushSize);
 				snipeData.setData(data);

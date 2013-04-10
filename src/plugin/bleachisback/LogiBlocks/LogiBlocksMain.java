@@ -30,6 +30,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -64,7 +66,16 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		getCommand("command").setExecutor(new BaseCommandListener(this));
 		getCommand("logicif").setExecutor(new LogiCommandListener(this));
 		
-		pm.registerEvents(new LogiBlocksCraftListener(this), this);
+		if(config.getBoolean("allow-crafting", true))
+		{
+			pm.registerEvents(new LogiBlocksCraftListener(this), this);
+			setupRecipe();
+		}
+		if(config.getBoolean("allow-command-insertion",true))
+		{
+			pm.registerEvents(new LogiBlocksInteractListener(this), this);
+			setupPermissions();
+		}
 		
 		registerFlag("getflag",this);
 		registerFlag("hasequip",this);
@@ -75,9 +86,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		inventorySubs.put("containsexact",1);
 		inventorySubs.put("isfull",0);
 		inventorySubs.put("isempty",0);
-		inventorySubs.put("slot",2);
-		
-		setupRecipe();
+		inventorySubs.put("slot",2);		
 		
 		log.info(desc.getFullName()+" is enabled");
 	}
@@ -155,6 +164,14 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 			}
 		}		
 		server.addRecipe(recipe);
+	}
+	
+	private void setupPermissions()
+	{
+		for(String perm:config.getConfigurationSection("permissions").getKeys(false))
+		{
+			pm.addPermission(new Permission("c.permission."+perm,PermissionDefault.OP));
+		}
 	}
 	
 	public boolean onFlag(String flag, String[] args, BlockCommandSender sender) throws FlagFailureException

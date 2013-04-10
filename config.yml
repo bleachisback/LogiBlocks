@@ -2,6 +2,14 @@ crafting-recipe:
 - 266,331,266
 - 331,264,331
 - 266,331,266
+allow-crafting: true
+allow-command-insertion: true
+permissions:
+    example:
+    - enchant @p
+    - weather clear
+    - say
+    - time
 commands:
     eject:
         enabled: true

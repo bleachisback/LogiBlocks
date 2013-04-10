@@ -16,5 +16,8 @@ permissions:
     c.craft:
         default: op
         description: Allows user to craft command blocks
+    c.edit:
+        default: true
+        description: Allows user to edit commands inside command blocks
     c.hidden.phantom:
         default: false
