@@ -80,7 +80,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		registerFlag("getflag",this);
 		registerFlag("hasequip",this);
 		registerFlag("inventory",this);
-		//registerFlag("exists",this);
+		registerFlag("exists",this);
 		
 		inventorySubs.put("contains",1);
 		inventorySubs.put("containsexact",1);
@@ -179,6 +179,10 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		switch(flag)
 		{
 			case "getflag":
+				if(!(args.length<1))
+				{
+					throw new FlagFailureException();
+				}
 				if(flagConfig.contains(args[0]))
 				{
 					return flagConfig.getBoolean(args[0]);
@@ -273,6 +277,10 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 				//end hasequip
 			case "inventory":
 				Inventory inventory= null;
+				if(args.length<1)
+				{
+					throw new FlagFailureException();
+				}
 				if((args[0].startsWith("@l[")&&args[1].endsWith("]"))||inventorySubs.containsKey(args[0]))
 				{
 					Location invLocation=LogiBlocksMain.parseLocation(args[0], sender.getBlock().getLocation());
@@ -314,7 +322,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 				{
 					throw new FlagFailureException();
 				}					
-				switch(args[subIndex])
+				switch(args[subIndex].toLowerCase())
 				{
 					case "contains":
 						ItemStack item=LogiBlocksMain.parseItemStack(args[subIndex+1]);
@@ -362,7 +370,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 						{
 							slot=0;
 						}
-						switch(args[subIndex+2])
+						switch(args[subIndex+2].toLowerCase())
 						{
 							case "is":
 								if(args.length<=subIndex+3)
@@ -398,6 +406,13 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 				}
 				break;
 				//end inventory
+			case "exists":
+				if(args.length<1)
+				{
+					throw new FlagFailureException();
+				}
+				return parseEntity(args[0],sender.getBlock().getWorld())!=null;
+				//end exists
 				
 		}
 		throw new FlagFailureException();

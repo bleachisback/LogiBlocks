@@ -86,14 +86,14 @@ public class LogiCommandListener implements CommandExecutor
 			return false;
 		}
 		//Checks to see if any plugin has registered that flag
-		FlagListener listener=plugin.flags.get(args[0]);
+		FlagListener listener=plugin.flags.get(args[0].toLowerCase());
 		if(listener==null)
 		{
 			return false;
 		} 
 		else try 
 		{
-			if(listener.onFlag(args[0], args1, (BlockCommandSender) sender))
+			if(listener.onFlag(args[0].toLowerCase(), args1, (BlockCommandSender) sender))
 			{
 				Bukkit.dispatchCommand(sender, cmdTrue);
 				return true;
