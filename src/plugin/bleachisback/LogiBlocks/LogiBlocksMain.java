@@ -81,6 +81,8 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		registerFlag("hasequip",this);
 		registerFlag("inventory",this);
 		registerFlag("exists",this);
+		registerFlag("hasPassenger",this);
+		registerFlag("isPassenger",this);
 		
 		inventorySubs.put("contains",1);
 		inventorySubs.put("containsexact",1);
@@ -413,7 +415,30 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 				}
 				return parseEntity(args[0],sender.getBlock().getWorld())!=null;
 				//end exists
-				
+			case "haspassenger":
+				if(args.length<1)
+				{
+					throw new FlagFailureException();
+				}
+				Entity entity = parseEntity(args[0],sender.getBlock().getWorld());
+				if(entity==null)
+				{
+					throw new FlagFailureException();
+				}
+				return entity.getPassenger()!=null;
+				//end hasPassanger
+			case "ispassenger":
+				if(args.length<1)
+				{
+					throw new FlagFailureException();
+				}
+				Entity entity1 = parseEntity(args[0],sender.getBlock().getWorld());
+				if(entity1==null)
+				{
+					throw new FlagFailureException();
+				}
+				return entity1.getVehicle()!=null;
+				//end isPassenger
 		}
 		throw new FlagFailureException();
 	}
