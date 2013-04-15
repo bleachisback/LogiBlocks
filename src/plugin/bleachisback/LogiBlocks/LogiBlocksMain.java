@@ -549,18 +549,6 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 								}
 							}
 						}
-						
-						//Stat dump debug code
-						/*Bukkit.getLogger().info("t="+(type==null?"null":type.getName()));
-						Bukkit.getLogger().info("x="+x);
-						Bukkit.getLogger().info("y="+y);
-						Bukkit.getLogger().info("z="+z);
-						Bukkit.getLogger().info("r="+r);
-						Bukkit.getLogger().info("rm="+rm);
-						Bukkit.getLogger().info("c="+c);
-						Bukkit.getLogger().info("rand="+rand);*/
-
-						Entity[] entities=new Entity[c];
 
 						List<Entity> nearbyEntities=block.getBlock().getWorld().getEntities();
 						
@@ -590,6 +578,14 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 						{
 							return false;
 						}
+						
+						if(c<1)
+						{
+							c=nearbyEntities.size();
+						}
+						
+						Entity[] entities=new Entity[c];
+
 						if(rand)
 						{
 							for(int i=0;i<c;i++)
@@ -619,7 +615,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 							}
 						}
 						String entid="";
-						if(c<=1)
+						if(c==1)
 						{
 							entid=""+entities[0].getEntityId();
 							args[currentArg]="@e["+entid+"]";
