@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -30,6 +31,7 @@ import org.bukkit.util.Vector;
 import com.thevoxelbox.voxelsniper.SnipeData;
 import com.thevoxelbox.voxelsniper.Sniper;
 import com.thevoxelbox.voxelsniper.SniperBrushes;
+import com.thevoxelbox.voxelsniper.Undo;
 import com.thevoxelbox.voxelsniper.brush.Brush;
 import com.thevoxelbox.voxelsniper.brush.perform.PerformBrush;
 import com.thevoxelbox.voxelsniper.brush.perform.PerformerE;
@@ -41,6 +43,7 @@ public class BaseCommandListener implements CommandExecutor
 	private Server server;
 	private HashMap<String,Integer> minArgs=new HashMap<String,Integer>();
 	private HashMap<String,Integer> inventorySubs=new HashMap<String,Integer>();
+	private HashMap<String,Sniper> snipers=new HashMap<String,Sniper>();
 
 	public BaseCommandListener(LogiBlocksMain plugin)
 	{
@@ -498,6 +501,43 @@ public class BaseCommandListener implements CommandExecutor
 				//end inventory
 			case "voxelsniper":
 			case "vs":
+				//Allows undos based on the "network" created by command block names
+				if(args[1].equalsIgnoreCase("undo")||args[1].equalsIgnoreCase("u"))
+				{
+					if(snipers.containsKey(block.getName()))
+					{
+						Sniper sniper=snipers.get(block.getName());
+						int undos=1;
+						if(args.length>2)
+						{
+							try
+							{
+								undos=Integer.parseInt(args[2]);
+							}
+							catch(NumberFormatException e)
+							{							
+							}
+						}
+						LinkedList<Undo> undoList=sniper.getUndoList();
+						if(undoList.isEmpty())
+						{
+							return false;
+						}
+						for(int i=0;i<undos;i++)
+						{
+							Undo undo=undoList.pollLast();
+							if(undo!=null)
+							{
+								undo.undo();
+							}
+							else
+							{
+								break;
+							}
+						}						
+					}
+					return true;
+				}
 				//Sets where the brush should be used at, should by the first arg after sub-command
 				Location location=LogiBlocksMain.parseLocation(args[1], block.getBlock().getRelative(BlockFace.UP).getLocation());
 				//Default brush attributes
@@ -598,15 +638,26 @@ public class BaseCommandListener implements CommandExecutor
 					}					
 				}
 				//end for
+				//Each sniper is based on the network created by named command blocks
+				//Each "network" will store its own undos
+				Sniper sniper=new Sniper();
+				if(snipers.containsKey(block.getName()))
+				{
+					sniper=snipers.get(block.getName());
+				}
+				else
+				{
+					snipers.put(block.getName(), sniper);
+				}
 				//Instantiates a new SnipeData object from VoxelSniper
-				SnipeData snipeData=new SnipeData(new Sniper());
+				SnipeData snipeData=new SnipeData(sniper);
 				snipeData.setBrushSize(brushSize);
 				snipeData.setData(data);
 				snipeData.setReplaceData(replaceData);
 				snipeData.setReplaceId(replaceId);
 				snipeData.setVoxelHeight(voxelHeight);
 				snipeData.setVoxelId(voxelId);
-				
+								
 				try 
 				{
 					//gets a VoxelSniper brush instance, and sets the variables to be able to run
@@ -675,23 +726,7 @@ public class BaseCommandListener implements CommandExecutor
 					method.setAccessible(true);
 					method.invoke(brush, snipeData);
 				} 
-				catch (NoSuchMethodException e) 
-				{
-					e.printStackTrace();
-				}
-				catch (NoSuchFieldException e) 
-				{
-					e.printStackTrace();
-				} 
-				catch (SecurityException e) 
-				{
-					e.printStackTrace();
-				}
-				catch (InvocationTargetException e) 
-				{
-					e.printStackTrace();
-				}
-				catch (IllegalAccessException e) 
+				catch (NoSuchMethodException | NoSuchFieldException | SecurityException | InvocationTargetException | IllegalAccessException e) 
 				{
 					e.printStackTrace();
 				}
