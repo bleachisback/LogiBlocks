@@ -42,6 +42,7 @@ public class BaseCommandListener implements CommandExecutor
 	private LogiBlocksMain plugin;
 	private Server server;
 	private HashMap<String,Integer> minArgs=new HashMap<String,Integer>();
+	private HashMap<String,String> aliases=new HashMap<String,String>();
 	private HashMap<String,Integer> inventorySubs=new HashMap<String,Integer>();
 	private HashMap<String,Sniper> snipers=new HashMap<String,Sniper>();
 
@@ -58,6 +59,7 @@ public class BaseCommandListener implements CommandExecutor
 		minArgs.put("equip", 4);
 		minArgs.put("repeat", 4);
 		minArgs.put("setflag", 3);
+		minArgs.put("setglobalflag", 3);
 		minArgs.put("inventory", 2);
 		
 		if(Bukkit.getPluginManager().getPlugin("VoxelSniper")!=null)
@@ -75,8 +77,10 @@ public class BaseCommandListener implements CommandExecutor
 				{
 					for(String alias:plugin.config.getStringList("commands."+name+".aliases"))
 					{
-						minArgs.put(alias, minArgs.get(name));
+						minArgs.put(alias.toLowerCase(), minArgs.get(name));
+						aliases.put(alias.toLowerCase(), name);
 					}
+					aliases.put(name, name);
 				}
 				else
 				{
@@ -130,10 +134,9 @@ public class BaseCommandListener implements CommandExecutor
 			return false;
 		}
 		Entity entity=null;
-		switch(args[0])
+		switch(aliases.get(args[0].toLowerCase()))
 		{
 			case "eject":
-			case "ej":
 				entity=LogiBlocksMain.parseEntity(args[1],block.getBlock().getWorld());
 				if(entity==null)
 				{
@@ -159,7 +162,6 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end kill
 			case "accelerate":
-			case "acc":
 				entity=LogiBlocksMain.parseEntity(args[1],block.getBlock().getWorld());
 				if(entity==null)
 				{
@@ -186,7 +188,6 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end delay
 			case "redstone":
-			case "rs":
 				ArrayList<Block> levers=new ArrayList<Block>();
 				for(BlockFace face:BlockFace.values())
 				{					
@@ -279,7 +280,6 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end equip
 			case "repeat":
-			case "rp":
 				String command1="";
 				for(int i=3;i<args.length;i++)
 				{
@@ -304,20 +304,19 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end repeat
 			case "setflag":
-			case "sf":
 				if(args[2].toLowerCase().equals("true"))
 				{
-					plugin.flagConfig.set(args[1], true);
+					plugin.flagConfig.set("local."+block.getName()+"."+args[1], true);
 				}
 				else if(args[2].toLowerCase().equals("false"))
 				{
-					plugin.flagConfig.set(args[1], false);
+					plugin.flagConfig.set("local."+block.getName()+"."+args[1], false);
 				}
 				else if(plugin.flags.containsKey(args[2]))
 				{					
 					try 
 					{
-						plugin.flagConfig.set(args[1], plugin.flags.get(args[2]).onFlag(args[2], Arrays.copyOfRange(args, 3, args.length+1), (BlockCommandSender) sender));
+						plugin.flagConfig.set("local."+block.getName()+"."+args[1], plugin.flags.get(args[2]).onFlag(args[2], Arrays.copyOfRange(args, 3, args.length+1), (BlockCommandSender) sender));
 					} 
 					catch (FlagFailureException e) 
 					{
@@ -334,8 +333,37 @@ public class BaseCommandListener implements CommandExecutor
 				}
 				break;
 				//end setflag
+			case "setglobalflag":
+				if(args[2].toLowerCase().equals("true"))
+				{
+					plugin.flagConfig.set("global."+args[1], true);
+				}
+				else if(args[2].toLowerCase().equals("false"))
+				{
+					plugin.flagConfig.set("global."+args[1], false);
+				}
+				else if(plugin.flags.containsKey(args[2]))
+				{					
+					try 
+					{
+						plugin.flagConfig.set("global."+args[1], plugin.flags.get(args[2]).onFlag(args[2], Arrays.copyOfRange(args, 3, args.length+1), (BlockCommandSender) sender));
+					} 
+					catch (FlagFailureException e) 
+					{
+						return true;
+					}
+				}
+				try 
+				{
+					plugin.flagConfig.save(LogiBlocksMain.flagFile);
+				} 
+				catch (IOException e) 
+				{
+					e.printStackTrace();
+				}
+				break;
+				//end setglobalflag
 			case "inventory":
-			case "inv":
 				ArrayList<Inventory> inventoryList= new ArrayList<Inventory>();
 				if((args[1].startsWith("@l[")&&args[1].endsWith("]"))||inventorySubs.containsKey(args[1]))
 				{
@@ -500,7 +528,6 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end inventory
 			case "voxelsniper":
-			case "vs":
 				//Allows undos based on the "network" created by command block names
 				if(args[1].equalsIgnoreCase("undo")||args[1].equalsIgnoreCase("u"))
 				{

@@ -1,6 +1,7 @@
 package plugin.bleachisback.LogiBlocks;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +60,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		
 		flagFile=new File(getDataFolder(), "flags");		
 		flagConfig=YamlConfiguration.loadConfiguration(flagFile);
+		convertOldFlags();
 		
 		saveDefaultConfig();
 		config=getConfig();
@@ -173,6 +175,28 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		for(String perm:config.getConfigurationSection("permissions").getKeys(false))
 		{
 			pm.addPermission(new Permission("c.permission."+perm,PermissionDefault.OP));
+		}
+	}
+	
+	private void convertOldFlags()
+	{
+		//Converts old flag files to new ones
+		//All old flags are now global flags
+		for(String name:flagConfig.getKeys(false))
+		{
+			if(!name.equals("global")&&!name.equals("local"))
+			{
+				flagConfig.set("global."+name, flagConfig.getBoolean(name));
+				flagConfig.set(name, null);
+				try 
+				{
+					flagConfig.save(flagFile);
+				} 
+				catch (IOException e) 
+				{
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	

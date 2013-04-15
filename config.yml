@@ -44,6 +44,10 @@ commands:
         enabled: true
         aliases:
         - sf
+    setglobalflag:
+        enabled: true
+        aliases:
+        - sgf
     inventory:
         enabled: true
         aliases:
