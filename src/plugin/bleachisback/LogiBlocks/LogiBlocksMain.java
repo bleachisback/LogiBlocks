@@ -542,6 +542,10 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 						
 						for(int i=0;i<nearbyEntities.size();i++)
 						{
+							if(i<0)
+							{
+								continue;
+							}
 							Entity entity=nearbyEntities.get(i);
 							if((entity.getLocation().distance(new Location(world,x,y,z))>r&&r>0)
 									||(entity.getLocation().distance(new Location(world,x,y,z))<rm))

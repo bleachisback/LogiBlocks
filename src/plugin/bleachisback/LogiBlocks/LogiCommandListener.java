@@ -79,8 +79,7 @@ public class LogiCommandListener implements CommandExecutor
 					break;
 				}
 			}
-		}
-		
+		}		
 		if(stage!=2)
 		{
 			return false;
