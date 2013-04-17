@@ -576,13 +576,22 @@ public class BaseCommandListener implements CommandExecutor
 				byte data=0;
 				byte replaceData=0;
 				int voxelHeight=1;
+				BlockFace blockFace=BlockFace.UP;
+				
+				ArrayList<String> voxelArgs = new ArrayList<String>();
 				
 				//goes through every following arg and parses the attributes
 				//Attributes are named similarly to their voxelsniper command, meaning voxelId is v and replaceId is vr
 				for(int i=2; i<args.length; i++)
 				{
+					//Brush arguments are recognised if they do not have an equal sign in them
 					if(!args[i].contains("="))
 					{
+						if(voxelArgs.isEmpty())
+						{
+							voxelArgs.add("");
+						}
+						voxelArgs.add(args[i]);
 						continue;
 					}
 					
@@ -662,6 +671,13 @@ public class BaseCommandListener implements CommandExecutor
 							{								
 							}
 							break;
+						case "bf":
+							blockFace=BlockFace.valueOf(att);
+							if(blockFace==null)
+							{
+								blockFace=BlockFace.UP;
+							}
+							break;
 					}					
 				}
 				//end for
@@ -690,6 +706,18 @@ public class BaseCommandListener implements CommandExecutor
 					//gets a VoxelSniper brush instance, and sets the variables to be able to run
 					Brush brush=(Brush) SniperBrushes.getBrushInstance(brushName);
 					
+					//Set brush arguments
+					if(!voxelArgs.isEmpty())
+					{
+						try
+						{
+							brush.parameters(voxelArgs.toArray(new String[0]), snipeData);
+						}
+						catch(NullPointerException e)
+						{
+						}
+					}					
+					
 					Field field=Brush.class.getDeclaredField("blockPositionX");					
 					field.setAccessible(true);
 					field.set(brush, location.getBlockX());
@@ -709,6 +737,10 @@ public class BaseCommandListener implements CommandExecutor
 					field=Brush.class.getDeclaredField("targetBlock");					
 					field.setAccessible(true);
 					field.set(brush, location.getBlock());
+					
+					field=Brush.class.getDeclaredField("lastBlock");					
+					field.setAccessible(true);
+					field.set(brush, location.getBlock().getRelative(blockFace));
 					
 					if(brush instanceof PerformBrush)
 					{						
