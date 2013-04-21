@@ -79,7 +79,10 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 			setupPermissions();
 		}
 		
-		registerFlag("getflag",this);
+		registerFlag("getFlag",this);
+		registerFlag("isFlag",this);
+		registerFlag("getGlobalFlag",this);
+		registerFlag("isGlobalFlag",this);
 		registerFlag("hasequip",this);
 		registerFlag("inventory",this);
 		registerFlag("exists",this);
@@ -209,13 +212,55 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 				{
 					throw new FlagFailureException();
 				}
-				if(flagConfig.contains(args[0]))
+				if(flagConfig.contains("local."+sender.getName()+"."+args[0]))
 				{
-					return flagConfig.getBoolean(args[0]);
+					return flagConfig.getBoolean("local."+sender.getName()+"."+args[0]);
 				}
 				else
 				{
 					throw new FlagFailureException();
+				}
+				//end getflag
+			case "isflag":
+				if(!(args.length<1))
+				{
+					throw new FlagFailureException();
+				}
+				if(flagConfig.contains("local."+sender.getName()+"."+args[0]))
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+				//end getflag
+			case "getglobalflag":
+				if(!(args.length<1))
+				{
+					throw new FlagFailureException();
+				}
+				if(flagConfig.contains("global."+args[0]))
+				{
+					return flagConfig.getBoolean("global."+args[0]);
+				}
+				else
+				{
+					throw new FlagFailureException();
+				}
+				//end getflag
+			case "isglobalflag":
+				if(!(args.length<1))
+				{
+					throw new FlagFailureException();
+				}
+				if(flagConfig.contains("global."+args[0]))
+				{
+					return true;
+				}
+				else
+				{
+					return false;
 				}
 				//end getflag
 			case "hasequip":
