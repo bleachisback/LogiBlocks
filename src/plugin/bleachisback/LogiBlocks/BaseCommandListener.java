@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -680,7 +681,7 @@ public class BaseCommandListener implements CommandExecutor
 							break;
 					}					
 				}
-				//end for
+				//end for				
 				//Each sniper is based on the network created by named command blocks
 				//Each "network" will store its own undos
 				Sniper sniper=new Sniper();
@@ -705,6 +706,16 @@ public class BaseCommandListener implements CommandExecutor
 				{
 					//gets a VoxelSniper brush instance, and sets the variables to be able to run
 					Brush brush=(Brush) SniperBrushes.getBrushInstance(brushName);
+					
+					//Check if brush is on blacklist
+					List<String> blacklist=plugin.config.getStringList("voxelsniper-blacklist");
+					for(String blackbrush:blacklist)
+					{
+						if(blackbrush.equalsIgnoreCase(brush.getName()))
+						{
+							return true;
+						}
+					}
 					
 					//Set brush arguments
 					if(!voxelArgs.isEmpty())
