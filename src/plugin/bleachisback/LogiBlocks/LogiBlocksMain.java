@@ -208,7 +208,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		switch(flag)
 		{
 			case "getflag":
-				if(!(args.length<1))
+				if(args.length<1)
 				{
 					throw new FlagFailureException();
 				}
@@ -222,7 +222,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 				}
 				//end getflag
 			case "isflag":
-				if(!(args.length<1))
+				if(args.length<1)
 				{
 					throw new FlagFailureException();
 				}
@@ -236,7 +236,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 				}
 				//end isflag
 			case "getglobalflag":
-				if(!(args.length<1))
+				if(args.length<1)
 				{
 					throw new FlagFailureException();
 				}
@@ -250,7 +250,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 				}
 				//end getglobalflag
 			case "isglobalflag":
-				if(!(args.length<1))
+				if(args.length<1)
 				{
 					throw new FlagFailureException();
 				}
