@@ -820,12 +820,25 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 	{
 		if(locString.startsWith("@l[")&&locString.endsWith("]"))
 		{
-			World world=def.getWorld();
-			double x=def.getX();
-			double y=def.getY();
-			double z=def.getZ();
-			float yaw=def.getYaw();
-			float pitch=def.getPitch();
+			World world=Bukkit.getWorlds().get(0);					
+			double x=0;
+			double y=0;
+			double z=0;
+			float yaw=0;
+			float pitch=0;
+			boolean rand=false;
+			int radius=100;
+			int minRadius=0;
+			
+			if(def!=null)
+			{
+				world=def.getWorld();
+				x=def.getX();
+				y=def.getY();
+				z=def.getZ();
+				yaw=def.getYaw();
+				pitch=def.getPitch();
+			}
 			
 			for(String arg:locString.substring(locString.indexOf("[")+1,locString.indexOf("]")).split(","))
 			{
@@ -878,9 +891,37 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 					case "yaw":
 						yaw=Float.parseFloat(arg.substring(arg.indexOf("=")+1,arg.length()));
 						break;
+					case "rand":
+						rand=Boolean.parseBoolean(arg.substring(arg.indexOf("=")+1,arg.length()));
+						break;
+					case "r":
+						radius=Integer.parseInt(arg.substring(arg.indexOf("=")+1,arg.length()));
+						break;
+					case "mr":
+						minRadius=Integer.parseInt(arg.substring(arg.indexOf("=")+1,arg.length()));
+						break;
 				}				
 			}
-			return new Location(world,x,y,z,yaw,pitch);
+			Location location=new Location(world,x,y,z,yaw,pitch);
+			if(rand)
+			{
+				Random randGen=new Random();
+				while(true)
+				{
+					double _x=randGen.nextInt(radius*2)-radius+x;
+					double _y=randGen.nextInt(radius*2)-radius+y;
+					double _z=randGen.nextInt(radius*2)-radius+z;
+					Location randLoc=new Location(world,_x,_y,_z,yaw,pitch);
+					if(randLoc.distance(location)<=radius&&randLoc.distance(location)>=minRadius)
+					{
+						return randLoc;
+					}
+				}				
+			}
+			else
+			{
+				return location;
+			}
 		}
 		else if(parseEntity(locString,def.getWorld())!=null)
 		{
