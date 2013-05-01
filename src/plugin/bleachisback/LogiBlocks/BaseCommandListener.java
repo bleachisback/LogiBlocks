@@ -10,6 +10,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.minecraft.server.v1_5_R2.EntityPlayer;
+import net.minecraft.server.v1_5_R2.Packet39AttachEntity;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -21,6 +24,7 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_5_R2.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -62,6 +66,7 @@ public class BaseCommandListener implements CommandExecutor
 		minArgs.put("setflag", 3);
 		minArgs.put("setglobalflag", 3);
 		minArgs.put("inventory", 2);
+		minArgs.put("teleport", 3);
 		
 		if(Bukkit.getPluginManager().getPlugin("VoxelSniper")!=null)
 		{
@@ -802,6 +807,34 @@ public class BaseCommandListener implements CommandExecutor
 				}
 				break;
 				//end voxelsniper
+			case "teleport":
+				Entity tper=LogiBlocksMain.parseEntity(args[1], block.getBlock().getWorld());
+				if(tper==null)
+				{
+					return false;
+				}
+				while(tper.getVehicle()!=null)
+				{
+					tper=tper.getVehicle();
+				}				
+				Location tpLocation=LogiBlocksMain.parseLocation(args[2], tper.getLocation());
+				Entity tpPassenger=tper.getPassenger();
+				tper.eject();
+				tper.teleport(tpLocation);
+				tper.setPassenger(tpPassenger);
+				if(tpPassenger instanceof Player)
+				{
+					final EntityPlayer entPlayer=((CraftPlayer)tpPassenger).getHandle();
+					server.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable()
+					{
+						public void run() 
+						{
+							entPlayer.playerConnection.sendPacket(new Packet39AttachEntity(entPlayer,entPlayer.vehicle));
+						}						
+					}, 1);
+				}
+				break;
+				//end teleport
 		}
 		return false;
 	}
