@@ -133,6 +133,11 @@ public class BaseCommandListener implements CommandExecutor
 		}
 		else
 		{
+			if(!sender.hasPermission("c.command"))
+			{
+				sender.sendMessage(ChatColor.DARK_RED+"You don't have permission for that!");
+				return true;
+			}
 			loc=((Player) sender).getLocation();
 		}		
 		if(!LogiBlocksMain.filter(args, sender, cmd, loc))

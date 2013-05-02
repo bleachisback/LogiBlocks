@@ -19,5 +19,8 @@ permissions:
     c.edit:
         default: true
         description: Allows user to edit commands inside command blocks
+    c.command:
+        default: op
+        description: Allows user to use commands normally
     c.hidden.phantom:
         default: false
