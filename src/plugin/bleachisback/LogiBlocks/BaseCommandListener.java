@@ -115,18 +115,27 @@ public class BaseCommandListener implements CommandExecutor
 
 	public boolean onCommand(final CommandSender sender, Command cmd, String label, String[] args)
 	{
-		if(!(sender instanceof BlockCommandSender))
+		if(!(sender instanceof BlockCommandSender)&&!(sender instanceof Player))
 		{
-			sender.sendMessage(ChatColor.DARK_RED+"That command is meant for command blocks!");
+			sender.sendMessage(ChatColor.DARK_RED+"That command can only be used in-game!");
 			return true;
 		}
 		if(args.length<1)
 		{
 			return false;
 		}
-		BlockCommandSender block=(BlockCommandSender) sender;
-		
-		if(!LogiBlocksMain.filter(args, block, cmd))
+		Location loc;
+		BlockCommandSender block = null;
+		if(sender instanceof BlockCommandSender)
+		{
+			block=(BlockCommandSender) sender;
+			loc=block.getBlock().getLocation();			
+		}
+		else
+		{
+			loc=((Player) sender).getLocation();
+		}		
+		if(!LogiBlocksMain.filter(args, sender, cmd, loc))
 		{
 			return false;
 		}
@@ -143,7 +152,7 @@ public class BaseCommandListener implements CommandExecutor
 		switch(aliases.get(args[0].toLowerCase()))
 		{
 			case "eject":
-				entity=LogiBlocksMain.parseEntity(args[1],block.getBlock().getWorld());
+				entity=LogiBlocksMain.parseEntity(args[1],loc.getWorld());
 				if(entity==null)
 				{
 					return false;
@@ -152,7 +161,7 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end eject
 			case "kill":
-				entity=LogiBlocksMain.parseEntity(args[1],block.getBlock().getWorld());
+				entity=LogiBlocksMain.parseEntity(args[1],loc.getWorld());
 				if(entity==null)
 				{
 					return false;
@@ -168,7 +177,7 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end kill
 			case "accelerate":
-				entity=LogiBlocksMain.parseEntity(args[1],block.getBlock().getWorld());
+				entity=LogiBlocksMain.parseEntity(args[1],loc.getWorld());
 				if(entity==null)
 				{
 					return false;
@@ -194,6 +203,11 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end delay
 			case "redstone":
+				if(!(sender instanceof BlockCommandSender))
+				{
+					sender.sendMessage(ChatColor.DARK_RED+"That can only be used by command blocks");
+					return true;
+				}
 				ArrayList<Block> levers=new ArrayList<Block>();
 				for(BlockFace face:BlockFace.values())
 				{					
@@ -222,18 +236,18 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end redstone
 			case "explode":
-				Location expLoc=LogiBlocksMain.parseLocation(args[1], block.getBlock().getLocation());
+				Location expLoc=LogiBlocksMain.parseLocation(args[1], loc);
 				if(args.length>=7)
 				{
-					block.getBlock().getWorld().createExplosion(expLoc.getX(),expLoc.getY(),expLoc.getZ(),Integer.parseInt(args[2]),Boolean.parseBoolean(args[3]), Boolean.parseBoolean(args[4]));
+					loc.getWorld().createExplosion(expLoc.getX(),expLoc.getY(),expLoc.getZ(),Integer.parseInt(args[2]),Boolean.parseBoolean(args[3]), Boolean.parseBoolean(args[4]));
 				}
 				else if(args.length==6)
 				{
-					block.getBlock().getWorld().createExplosion(expLoc,Integer.parseInt(args[2]),Boolean.parseBoolean(args[3]));
+					loc.getWorld().createExplosion(expLoc,Integer.parseInt(args[2]),Boolean.parseBoolean(args[3]));
 				}
 				else
 				{
-					block.getBlock().getWorld().createExplosion(expLoc,Integer.parseInt(args[2]));
+					loc.getWorld().createExplosion(expLoc,Integer.parseInt(args[2]));
 				}
 				break;
 				//end explode
@@ -256,7 +270,7 @@ public class BaseCommandListener implements CommandExecutor
 						return false;
 				}
 				ItemStack item=LogiBlocksMain.parseItemStack(args[3]);
-				Entity equipEntity=LogiBlocksMain.parseEntity(args[1],block.getBlock().getWorld());				
+				Entity equipEntity=LogiBlocksMain.parseEntity(args[1],loc.getWorld());				
 				if(equipEntity==null||!(equipEntity instanceof LivingEntity))
 				{
 					return false;
@@ -373,7 +387,7 @@ public class BaseCommandListener implements CommandExecutor
 				ArrayList<Inventory> inventoryList= new ArrayList<Inventory>();
 				if((args[1].startsWith("@l[")&&args[1].endsWith("]"))||inventorySubs.containsKey(args[1]))
 				{
-					Location invLocation=LogiBlocksMain.parseLocation(args[1], block.getBlock().getLocation());
+					Location invLocation=LogiBlocksMain.parseLocation(args[1], loc);
 					for(int x=-1;x<=1;x++)
 					{
 						for(int y=-1;y<=1;y++)
@@ -484,7 +498,7 @@ public class BaseCommandListener implements CommandExecutor
 							Inventory targetInventory;
 							if(args[subIndex+1].startsWith("@l[")&&args[subIndex+1].endsWith("]"))
 							{
-								Block targetBlock=LogiBlocksMain.parseLocation(args[subIndex+1], block.getBlock().getLocation()).getBlock();
+								Block targetBlock=LogiBlocksMain.parseLocation(args[subIndex+1], loc).getBlock();
 								if(targetBlock.getState() instanceof InventoryHolder)
 								{
 									targetInventory=((InventoryHolder) targetBlock.getState()).getInventory();
@@ -534,6 +548,11 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end inventory
 			case "voxelsniper":
+				if(!(sender instanceof BlockCommandSender))
+				{
+					sender.sendMessage(ChatColor.DARK_RED+"That can only be used by command blocks");
+					return true;
+				}
 				//Allows undos based on the "network" created by command block names
 				if(args[1].equalsIgnoreCase("undo")||args[1].equalsIgnoreCase("u"))
 				{
@@ -808,7 +827,7 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end voxelsniper
 			case "teleport":
-				Entity tper=LogiBlocksMain.parseEntity(args[1], block.getBlock().getWorld());
+				Entity tper=LogiBlocksMain.parseEntity(args[1], loc.getWorld());
 				if(tper==null)
 				{
 					return false;

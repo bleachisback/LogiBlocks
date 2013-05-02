@@ -512,7 +512,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		throw new FlagFailureException();
 	}
 	
-	public static boolean filter(String[] args, BlockCommandSender block, Command command)
+	public static boolean filter(String[] args, CommandSender sender, Command command, Location loc)
 	{
 		for(int currentArg=0;currentArg<args.length;currentArg++)
 		{
@@ -522,12 +522,12 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 				switch(string.charAt(1))
 				{
 					case 'e':
-						World world=block.getBlock().getWorld();
+						World world=loc.getWorld();
 						//search properties
 						EntityType type=null;
-						double x=block.getBlock().getX();
-						double y=block.getBlock().getY();
-						double z=block.getBlock().getZ();
+						double x=loc.getX();
+						double y=loc.getY();
+						double z=loc.getZ();
 						int r=0;
 						int rm=0;
 						int c=1;
@@ -595,7 +595,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 							}
 						}
 
-						List<Entity> nearbyEntities=block.getBlock().getWorld().getEntities();
+						List<Entity> nearbyEntities=loc.getWorld().getEntities();
 						
 						for(int i=0;i<nearbyEntities.size();i++)
 						{
@@ -642,7 +642,6 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 						}
 						else
 						{
-							Location loc=block.getBlock().getLocation();							
 							for(int i=0;i<c;i++)
 							{
 								double distance=nearbyEntities.get(0).getLocation().distance(loc);
@@ -673,15 +672,13 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 								String newArg="@e["+entities[i].getEntityId()+"]";
 								for(int j=currentArg+1;j<args.length;j++)
 								{
-									Bukkit.getLogger().info("Arg comparison: "+args[currentArg]+" == "+args[j]);
 									if(args[currentArg].equals(args[j]))
 									{
-										Bukkit.getLogger().info("True");
 										newArgs[j]=newArg;
 									}
 								}
 								newArgs[currentArg]=newArg;								
-								command.execute(block, command.getLabel(), newArgs);								
+								command.execute(sender, command.getLabel(), newArgs);								
 							}
 							return false;
 						}
