@@ -155,11 +155,6 @@ public class BaseCommandListener implements CommandExecutor
 			}
 			loc=((Player) sender).getLocation();
 		}		
-		if(!LogiBlocksMain.filter(args, sender, cmd, loc))
-		{
-			return false;
-		}
-		
 		if(!minArgs.containsKey(args[0]))
 		{
 			return false;

@@ -21,10 +21,6 @@ public class LogiCommandListener implements CommandExecutor
 		{
 			return false;
 		}
-		if(!LogiBlocksMain.filter(args, sender, cmd, ((BlockCommandSender)sender).getBlock().getLocation()))
-		{
-			return false;
-		}
 		
 		int stage=0;
 		String[] args1=null;

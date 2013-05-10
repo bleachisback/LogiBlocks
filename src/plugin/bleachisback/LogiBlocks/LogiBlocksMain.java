@@ -70,6 +70,8 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		getCommand("command").setExecutor(new BaseCommandListener(this));
 		getCommand("logicif").setExecutor(new LogiCommandListener(this));
 		
+		new FilterCommandListener(this);		
+		
 		if(config.getBoolean("allow-crafting", true))
 		{
 			pm.registerEvents(new LogiBlocksCraftListener(this), this);
