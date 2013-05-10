@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -64,6 +65,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		
 		saveDefaultConfig();
 		config=getConfig();
+		updateConfig();
 		
 		getCommand("command").setExecutor(new BaseCommandListener(this));
 		getCommand("logicif").setExecutor(new LogiCommandListener(this));
@@ -201,6 +203,19 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 				}
 			}
 		}
+	}
+	
+	private void updateConfig()
+	{
+		Map<String,Object> map=config.getDefaults().getValues(true);
+		for(String key:map.keySet())
+		{
+			if(config.get(key,null)==null)
+			{
+				config.set(key, map.get(key));				
+			}
+		}		
+		saveConfig();
 	}
 	
 	public boolean onFlag(String flag, String[] args, BlockCommandSender sender) throws FlagFailureException
