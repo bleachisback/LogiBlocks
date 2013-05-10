@@ -10,9 +10,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.minecraft.server.v1_5_R2.EntityPlayer;
-import net.minecraft.server.v1_5_R2.Packet39AttachEntity;
+import net.minecraft.server.v1_5_R3.EntityPlayer;
+import net.minecraft.server.v1_5_R3.Packet39AttachEntity;
 
+import org.bukkit.Art;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -24,10 +25,23 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_5_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_5_R3.entity.CraftPlayer;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Ocelot;
+import org.bukkit.entity.Painting;
+import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Slime;
+import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -67,6 +81,7 @@ public class BaseCommandListener implements CommandExecutor
 		minArgs.put("setglobalflag", 3);
 		minArgs.put("inventory", 2);
 		minArgs.put("teleport", 3);
+		minArgs.put("spawn", 2);
 		
 		if(Bukkit.getPluginManager().getPlugin("VoxelSniper")!=null)
 		{
@@ -859,7 +874,228 @@ public class BaseCommandListener implements CommandExecutor
 				}
 				break;
 				//end teleport
+			case "spawn":
+				Location spawnLocation=loc.add(0,1,0);
+				int amount=1;
+				if(args.length>=3)
+				{
+					spawnLocation=LogiBlocksMain.parseLocation(args[2], spawnLocation);
+				}
+				if(args.length>=4)
+				{
+					try
+					{
+						amount=Integer.parseInt(args[3]);
+					}
+					catch(NumberFormatException e)
+					{						
+					}
+				}
+				for(int i=0;i<amount;i++)
+				{
+					spawn(args[1],spawnLocation);
+				}
+				break;
+				//end spawn
 		}
 		return false;
+	}
+	
+	private void spawn(String stackString,Location spawnLocation)
+	{
+		ArrayList<String> stackArray=new ArrayList<String>(Arrays.asList(stackString.split(",")));		
+		ArrayList<Entity> stack=new ArrayList<Entity>();
+		for(int i=0;i<stackArray.size();i++)
+		{
+			String entString=stackArray.get(i);
+			if(entString.equals("&"))
+			{
+				if(i==0)
+				{
+					continue;
+				}
+				entString=stackArray.get(i-1);
+				stackArray.set(i, stackArray.get(i-1));
+			}
+			if(entString.equals("&&"))
+			{
+				stackArray.remove(i);
+				for(int j=i-1;j>=0;j--)
+				{
+					stackArray.add(i, stackArray.get(j));
+				}
+				i--;
+			}
+			String typeString=entString.contains(":")?entString.substring(0,entString.indexOf(":")):entString;
+			String dataString=entString.contains(":")?entString.substring(entString.indexOf(":")+1,entString.length()):null;
+			EntityType type=null;
+			try
+			{
+				type=EntityType.values()[Integer.parseInt(typeString)];
+			}
+			catch(NumberFormatException e)
+			{
+				type=EntityType.fromName(typeString);
+			}
+			if(type==null)
+			{
+				continue;
+			}
+			Entity ent=spawnLocation.getWorld().spawnEntity(spawnLocation, type);			
+			handleData(ent,dataString);
+			if(stack.size()>0)
+			{
+				stack.get(stack.size()-1).setPassenger(ent);
+			}
+			stack.add(ent);
+		}
+	}
+	
+	@SuppressWarnings("incomplete-switch")
+	private void handleData(Entity ent, String data)
+	{
+		if(data==null)
+		{
+			return;
+		}
+		for(String dataPiece:data.split(";"))
+		{
+			if(ent instanceof LivingEntity&&(dataPiece.startsWith("n=")||dataPiece.startsWith("name=")))
+			{
+				((LivingEntity)ent).setCustomName(dataPiece.substring(dataPiece.indexOf("=")+1,dataPiece.length()));
+				data=data.replace(dataPiece, "").replace(";", "");				
+			}
+		}
+		switch(ent.getType())
+		{
+			case CREEPER:
+				((Creeper)ent).setPowered(data.equalsIgnoreCase("powered"));
+				break;
+			case ENDERMAN:
+				Material enderMat=null;
+				try
+				{
+					enderMat=Material.getMaterial(Integer.parseInt(data));
+				}
+				catch(NumberFormatException e)
+				{
+					enderMat=Material.matchMaterial(data);
+				}
+				if(enderMat==null)
+				{
+					return;
+				}
+				((Enderman)ent).setCarriedMaterial(enderMat.getNewData((byte)0));
+				break;
+			case EXPERIENCE_ORB:
+				try
+				{
+					((ExperienceOrb)ent).setExperience(Integer.parseInt(data));
+				}
+				catch(NumberFormatException e)
+				{					
+				}
+				break;
+			case ITEM_FRAME:
+				Material frameMat=null;
+				try
+				{
+					frameMat=Material.getMaterial(Integer.parseInt(data));
+				}
+				catch(NumberFormatException e)
+				{
+					frameMat=Material.matchMaterial(data);
+				}
+				if(frameMat==null)
+				{
+					return;
+				}
+				((ItemFrame)ent).setItem(new ItemStack(frameMat));
+				break;
+			case MAGMA_CUBE:
+				try
+				{
+					((Slime)ent).setSize(Integer.parseInt(data));
+				}
+				catch(NumberFormatException e)
+				{					
+				}
+				break;
+			case OCELOT:
+				Ocelot.Type ocelotType=null;
+				try
+				{
+					ocelotType=Ocelot.Type.getType(Integer.parseInt(data));
+				}
+				catch(NumberFormatException e)
+				{
+					ocelotType=Ocelot.Type.valueOf(data.toUpperCase());
+				}
+				if(ocelotType==null)
+				{
+					return;
+				}
+				((Ocelot)ent).setCatType(ocelotType);
+				break;
+			case PAINTING:
+				Art paintType=null;
+				try
+				{
+					paintType=Art.getById(Integer.parseInt(data));
+				}
+				catch(NumberFormatException e)
+				{
+					paintType=Art.getByName(data);
+				}
+				if(paintType==null)
+				{
+					return;
+				}
+				((Painting)ent).setArt(paintType);
+				break;
+			case PIG:
+				((Pig)ent).setSaddle(data.equalsIgnoreCase("saddle")||data.equalsIgnoreCase("saddled"));
+				break;
+			case PRIMED_TNT:
+				try
+				{
+					((TNTPrimed)ent).setFuseTicks(Integer.parseInt(data));
+				}
+				catch(NumberFormatException e)
+				{					
+				}
+				break;
+			case SHEEP:
+				((Sheep)ent).setSheared(data.equalsIgnoreCase("sheared")||data.equalsIgnoreCase("naked"));
+				break;
+			case SKELETON:
+				((Skeleton)ent).setSkeletonType(data.equalsIgnoreCase("wither")?Skeleton.SkeletonType.WITHER:Skeleton.SkeletonType.NORMAL);
+				break;
+			case SLIME:
+				try
+				{
+					((Slime)ent).setSize(Integer.parseInt(data));
+				}
+				catch(NumberFormatException e)
+				{					
+				}
+				break;
+			case VILLAGER:
+				Villager.Profession villagerProfession=null;
+				try
+				{
+					villagerProfession=Villager.Profession.getProfession(Integer.parseInt(data));
+				}
+				catch(NumberFormatException e)
+				{
+					villagerProfession=Villager.Profession.valueOf(data.toUpperCase());
+				}
+				if(villagerProfession==null)
+				{
+					return;
+				}
+				((Villager)ent).setProfession(villagerProfession);
+				break;
+		}
 	}
 }
