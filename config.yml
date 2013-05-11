@@ -71,3 +71,11 @@ commands:
     spawn:
         enabled: true
         aliases:
+    message:
+        enabled: true
+        aliases:
+        - msg
+    rawmessage
+        enabled: true
+        aliases:
+        - rawmsg

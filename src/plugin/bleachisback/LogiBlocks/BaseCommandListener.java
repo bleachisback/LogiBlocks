@@ -82,6 +82,8 @@ public class BaseCommandListener implements CommandExecutor
 		minArgs.put("inventory", 2);
 		minArgs.put("teleport", 3);
 		minArgs.put("spawn", 2);
+		minArgs.put("message", 3);
+		minArgs.put("rawmessage", 3);
 		
 		if(Bukkit.getPluginManager().getPlugin("VoxelSniper")!=null)
 		{
@@ -892,6 +894,44 @@ public class BaseCommandListener implements CommandExecutor
 				}
 				break;
 				//end spawn
+			case "message":
+				Player messageReceiver = server.getPlayer(args[1]);
+				if(messageReceiver==null)
+				{
+					sender.sendMessage(ChatColor.RED+"That person doesn't exist!");
+					return true;
+				}
+				String messageBuilder="";
+				for(int i=2;i<args.length;i++)
+				{
+					String messagePiece=args[i];
+					//format each piece of the message using minecraft format codes
+					messagePiece=ChatColor.translateAlternateColorCodes('&', messagePiece);
+					messageBuilder=messageBuilder+messagePiece+" ";
+				}
+				messageBuilder=messageBuilder.trim();
+				messageReceiver.sendMessage(sender.getName()+": "+messageBuilder);
+				break;
+				//end message
+			case "rawmessage":
+				Player rawReceiver = server.getPlayer(args[1]);
+				if(rawReceiver==null)
+				{
+					sender.sendMessage(ChatColor.RED+"That person doesn't exist!");
+					return true;
+				}
+				String rawBuilder="";
+				for(int i=2;i<args.length;i++)
+				{
+					String messagePiece=args[i];
+					//format each piece of the message using minecraft format codes
+					messagePiece=ChatColor.translateAlternateColorCodes('&', messagePiece);
+					rawBuilder=rawBuilder+messagePiece+" ";
+				}
+				rawBuilder=rawBuilder.trim();
+				rawReceiver.sendMessage(rawBuilder);
+				break;
+				//end rawmessage
 		}
 		return false;
 	}
