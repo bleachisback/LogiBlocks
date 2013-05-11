@@ -1,9 +1,11 @@
-package plugin.bleachisback.LogiBlocks;
+package plugin.bleachisback.LogiBlocks.Listeners;
 
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
+
+import plugin.bleachisback.LogiBlocks.LogiBlocksMain;
 
 public class LogiBlocksCraftListener implements Listener
 {

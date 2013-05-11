@@ -32,7 +32,7 @@ public class FilterCommandListener implements CommandExecutor
 				PluginCommand cmd=Bukkit.getPluginCommand(cmdString);
 				if(cmd==null)
 				{
-					this.plugin.log.info("Null detected at command: "+cmdString);
+					plugin.log.info("Null detected at command: "+cmdString);
 					continue;
 				}
 				executors.put(cmd, cmd.getExecutor());
@@ -55,7 +55,7 @@ public class FilterCommandListener implements CommandExecutor
 			{
 				loc=((BlockCommandSender)sender).getBlock().getLocation();
 			}
-			if(!LogiBlocksMain.filter(args, sender, cmd, loc))
+			if(!plugin.filter(args, sender, cmd, loc))
 			{
 				return true;
 			}

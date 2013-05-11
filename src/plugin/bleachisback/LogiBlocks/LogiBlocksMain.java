@@ -38,6 +38,10 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import plugin.bleachisback.LogiBlocks.Listeners.LogiBlocksCraftListener;
+import plugin.bleachisback.LogiBlocks.Listeners.LogiBlocksInteractListener;
+import plugin.bleachisback.LogiBlocks.Listeners.LogiBlocksRedstoneListener;
+
 public class LogiBlocksMain extends JavaPlugin implements FlagListener
 {
 	protected Logger log;
@@ -51,6 +55,8 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 	protected static File flagFile;
 	protected HashMap<String, FlagListener> flags= new HashMap<String, FlagListener>();	
 	private HashMap<String,Integer> inventorySubs=new HashMap<String,Integer>();
+	
+	private Entity lastRedstone=null;
 			
 	public void onEnable()
 	{
@@ -81,6 +87,10 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		{
 			pm.registerEvents(new LogiBlocksInteractListener(this), this);
 			setupPermissions();
+		}
+		if(config.getBoolean("listen-for-redstone",true))
+		{
+			pm.registerEvents(new LogiBlocksRedstoneListener(this), this);
 		}
 		
 		registerFlag("getFlag",this);
@@ -529,7 +539,7 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		throw new FlagFailureException();
 	}
 	
-	public static boolean filter(String[] args, CommandSender sender, Command command, Location loc)
+	public boolean filter(String[] args, CommandSender sender, Command command, Location loc)
 	{
 		for(int currentArg=0;currentArg<args.length;currentArg++)
 		{
@@ -559,9 +569,9 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 			}
 			else if(string.startsWith("@"))
 			{
-				switch(string.charAt(1))
+				switch(string.substring(1,string.contains("[")?string.indexOf("["):string.length()))
 				{
-					case 'e':
+					case "e":
 						World world=loc.getWorld();
 						//search properties
 						EntityType type=null;
@@ -701,8 +711,15 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 						String entid="";
 						if(c==1)
 						{
-							entid=""+entities[0].getEntityId();
-							args[currentArg]="@e["+entid+"]";
+							if(entities[0] instanceof Player)
+							{
+								args[currentArg]=((Player)entities[0]).getName();
+							}
+							else
+							{
+								entid=""+entities[0].getEntityId();
+								args[currentArg]="@e["+entid+"]";
+							}							
 						}
 						else
 						{
@@ -716,7 +733,15 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 							}
 							for(int i=0;i<c;i++)
 							{
-								String newArg="@e["+entities[i].getEntityId()+"]";
+								String newArg="";
+								if(entities[i] instanceof Player)
+								{
+									newArg=((Player)entities[0]).getName();
+								}
+								else
+								{
+									newArg="@e["+entities[i].getEntityId()+"]";
+								}
 								for(int j=currentArg+1;j<args.length;j++)
 								{
 									if(args[currentArg].equals(args[j]))
@@ -731,10 +756,35 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 						}
 						return true;
 						//End @e
+					case "lr":
+						if(lastRedstone==null)
+						{
+							return false;
+						}
+						else if(lastRedstone instanceof Player)
+						{
+							args[currentArg]=((Player)lastRedstone).getName();
+						}
+						else
+						{
+							args[currentArg]="@e["+lastRedstone.getEntityId()+"]";
+						}						
+						return true;
+						//end @r
 				}
 			}
 		}
 		return true;
+	}
+	
+	public void setLastRedstone(Entity ent)
+	{
+		lastRedstone=ent;
+	}
+	
+	public Entity getLastRedstone()
+	{
+		return lastRedstone;
 	}
 	
 	public static ItemStack parseItemStack(String itemString)

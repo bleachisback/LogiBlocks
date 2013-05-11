@@ -998,7 +998,7 @@ public class BaseCommandListener implements CommandExecutor
 			if(ent instanceof LivingEntity&&(dataPiece.startsWith("n=")||dataPiece.startsWith("name=")))
 			{
 				((LivingEntity)ent).setCustomName(dataPiece.substring(dataPiece.indexOf("=")+1,dataPiece.length()));
-				data=data.replace(dataPiece, "").replace(";", "");				
+				data=data.replace(dataPiece, "").replace(";", "");
 			}
 		}
 		switch(ent.getType())

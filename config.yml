@@ -18,6 +18,7 @@ voxelsniper-blacklist:
 - copypasta
 - warp
 - voltmeter
+listen-for-redstone: true
 commands:
     eject:
         enabled: true
@@ -75,7 +76,7 @@ commands:
         enabled: true
         aliases:
         - msg
-    rawmessage
+    rawmessage:
         enabled: true
         aliases:
         - rawmsg

@@ -1,4 +1,4 @@
-package plugin.bleachisback.LogiBlocks;
+package plugin.bleachisback.LogiBlocks.Listeners;
 
 import java.util.WeakHashMap;
 
@@ -15,6 +15,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+
+import plugin.bleachisback.LogiBlocks.LogiBlocksMain;
 
 public class LogiBlocksInteractListener implements Listener
 {
@@ -59,11 +61,11 @@ public class LogiBlocksInteractListener implements Listener
 			}
 			else if(awaitingPlayers.get(e.getPlayer()).getType()==Material.COMMAND)
 			{
-				for(String perm:plugin.config.getConfigurationSection("permissions").getKeys(false))
+				for(String perm:plugin.getConfig().getConfigurationSection("permissions").getKeys(false))
 				{
 					if(e.getPlayer().hasPermission("c.permission."+perm))
 					{
-						loop: for(String command:plugin.config.getStringList("permissions."+perm))
+						loop: for(String command:plugin.getConfig().getStringList("permissions."+perm))
 						{
 							command=command.replace("/", "");
 							if(e.getMessage().length()>command.length())
