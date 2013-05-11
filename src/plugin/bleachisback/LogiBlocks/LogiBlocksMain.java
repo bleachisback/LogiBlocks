@@ -534,7 +534,30 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 		for(int currentArg=0;currentArg<args.length;currentArg++)
 		{
 			String string=args[currentArg];
-			if(string.startsWith("@"))
+			if(string.equals("&&"))
+			{	
+				String[] originalCommand=Arrays.copyOfRange(args,0,currentArg);
+				String commandLine=command.getName()+" ";
+				for(String commandPart:originalCommand)
+				{
+					commandLine=commandLine+commandPart+" ";
+				}
+				Bukkit.dispatchCommand(sender, commandLine);
+				
+				String[] newCommand=Arrays.copyOfRange(args,currentArg+1,args.length);
+				String commandLine2="";
+				for(String commandPart:newCommand)
+				{
+					commandLine2=commandLine2+commandPart+" ";
+				}
+				Bukkit.dispatchCommand(sender, commandLine2);
+				return false;
+			}
+			else if(string.equals("\\&&"))
+			{
+				args[currentArg]="&&";
+			}
+			else if(string.startsWith("@"))
 			{
 				switch(string.charAt(1))
 				{
@@ -683,7 +706,14 @@ public class LogiBlocksMain extends JavaPlugin implements FlagListener
 						}
 						else
 						{
-							String[] newArgs=args;							
+							String[] newArgs=args;
+							for(int i=0;i<newArgs.length;i++)
+							{
+								if(newArgs[i].equals("&&"))
+								{
+									newArgs[i]="\\&&";
+								}
+							}
 							for(int i=0;i<c;i++)
 							{
 								String newArg="@e["+entities[i].getEntityId()+"]";

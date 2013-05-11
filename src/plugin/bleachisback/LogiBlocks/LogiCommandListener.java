@@ -69,11 +69,27 @@ public class LogiCommandListener implements CommandExecutor
 					fromWhen=i+1;
 					for(int j=fromWhen;j<args.length;j++)
 					{
+						if(args[j].equals("&"))
+						{
+							args[j]="&&";
+						}
+						else if(args[j].equals("\\&"))
+						{
+							args[j]="&";
+						}
 						cmdFalse=cmdFalse+args[j]+" ";
 					}
 					cmdFalse.trim();
 					break;
 				}
+			}
+			else if(arg.equals("&"))
+			{
+				args[i]="&&";
+			}
+			else if(arg.equals("\\&"))
+			{
+				args[i]="&";
 			}
 		}		
 		if(stage!=2)

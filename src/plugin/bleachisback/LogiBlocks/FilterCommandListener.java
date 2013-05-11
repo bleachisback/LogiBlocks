@@ -57,7 +57,7 @@ public class FilterCommandListener implements CommandExecutor
 			}
 			if(!LogiBlocksMain.filter(args, sender, cmd, loc))
 			{
-				return false;
+				return true;
 			}
 		}
 		if(!executors.containsKey(cmd))
