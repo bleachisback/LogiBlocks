@@ -998,139 +998,139 @@ public class BaseCommandListener implements CommandExecutor
 			if(ent instanceof LivingEntity&&(dataPiece.startsWith("n=")||dataPiece.startsWith("name=")))
 			{
 				((LivingEntity)ent).setCustomName(dataPiece.substring(dataPiece.indexOf("=")+1,dataPiece.length()));
-				data=data.replace(dataPiece, "").replace(";", "");
+				continue;				
 			}
-		}
-		switch(ent.getType())
-		{
-			case CREEPER:
-				((Creeper)ent).setPowered(data.equalsIgnoreCase("powered"));
-				break;
-			case ENDERMAN:
-				Material enderMat=null;
-				try
-				{
-					enderMat=Material.getMaterial(Integer.parseInt(data));
-				}
-				catch(NumberFormatException e)
-				{
-					enderMat=Material.matchMaterial(data);
-				}
-				if(enderMat==null)
-				{
-					return;
-				}
-				((Enderman)ent).setCarriedMaterial(enderMat.getNewData((byte)0));
-				break;
-			case EXPERIENCE_ORB:
-				try
-				{
-					((ExperienceOrb)ent).setExperience(Integer.parseInt(data));
-				}
-				catch(NumberFormatException e)
-				{					
-				}
-				break;
-			case ITEM_FRAME:
-				Material frameMat=null;
-				try
-				{
-					frameMat=Material.getMaterial(Integer.parseInt(data));
-				}
-				catch(NumberFormatException e)
-				{
-					frameMat=Material.matchMaterial(data);
-				}
-				if(frameMat==null)
-				{
-					return;
-				}
-				((ItemFrame)ent).setItem(new ItemStack(frameMat));
-				break;
-			case MAGMA_CUBE:
-				try
-				{
-					((Slime)ent).setSize(Integer.parseInt(data));
-				}
-				catch(NumberFormatException e)
-				{					
-				}
-				break;
-			case OCELOT:
-				Ocelot.Type ocelotType=null;
-				try
-				{
-					ocelotType=Ocelot.Type.getType(Integer.parseInt(data));
-				}
-				catch(NumberFormatException e)
-				{
-					ocelotType=Ocelot.Type.valueOf(data.toUpperCase());
-				}
-				if(ocelotType==null)
-				{
-					return;
-				}
-				((Ocelot)ent).setCatType(ocelotType);
-				break;
-			case PAINTING:
-				Art paintType=null;
-				try
-				{
-					paintType=Art.getById(Integer.parseInt(data));
-				}
-				catch(NumberFormatException e)
-				{
-					paintType=Art.getByName(data);
-				}
-				if(paintType==null)
-				{
-					return;
-				}
-				((Painting)ent).setArt(paintType);
-				break;
-			case PIG:
-				((Pig)ent).setSaddle(data.equalsIgnoreCase("saddle")||data.equalsIgnoreCase("saddled"));
-				break;
-			case PRIMED_TNT:
-				try
-				{
-					((TNTPrimed)ent).setFuseTicks(Integer.parseInt(data));
-				}
-				catch(NumberFormatException e)
-				{					
-				}
-				break;
-			case SHEEP:
-				((Sheep)ent).setSheared(data.equalsIgnoreCase("sheared")||data.equalsIgnoreCase("naked"));
-				break;
-			case SKELETON:
-				((Skeleton)ent).setSkeletonType(data.equalsIgnoreCase("wither")?Skeleton.SkeletonType.WITHER:Skeleton.SkeletonType.NORMAL);
-				break;
-			case SLIME:
-				try
-				{
-					((Slime)ent).setSize(Integer.parseInt(data));
-				}
-				catch(NumberFormatException e)
-				{					
-				}
-				break;
-			case VILLAGER:
-				Villager.Profession villagerProfession=null;
-				try
-				{
-					villagerProfession=Villager.Profession.getProfession(Integer.parseInt(data));
-				}
-				catch(NumberFormatException e)
-				{
-					villagerProfession=Villager.Profession.valueOf(data.toUpperCase());
-				}
-				if(villagerProfession==null)
-				{
-					return;
-				}
-				((Villager)ent).setProfession(villagerProfession);
-				break;
+			switch(ent.getType())
+			{
+				case CREEPER:
+					((Creeper)ent).setPowered(dataPiece.equalsIgnoreCase("powered"));
+					break;
+				case ENDERMAN:
+					Material enderMat=null;
+					try
+					{
+						enderMat=Material.getMaterial(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{
+						enderMat=Material.matchMaterial(dataPiece);
+					}
+					if(enderMat==null)
+					{
+						return;
+					}
+					((Enderman)ent).setCarriedMaterial(enderMat.getNewData((byte)0));
+					break;
+				case EXPERIENCE_ORB:
+					try
+					{
+						((ExperienceOrb)ent).setExperience(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{					
+					}
+					break;
+				case ITEM_FRAME:
+					Material frameMat=null;
+					try
+					{
+						frameMat=Material.getMaterial(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{
+						frameMat=Material.matchMaterial(dataPiece);
+					}
+					if(frameMat==null)
+					{
+						return;
+					}
+					((ItemFrame)ent).setItem(new ItemStack(frameMat));
+					break;
+				case MAGMA_CUBE:
+					try
+					{
+						((Slime)ent).setSize(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{					
+					}
+					break;
+				case OCELOT:
+					Ocelot.Type ocelotType=null;
+					try
+					{
+						ocelotType=Ocelot.Type.getType(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{
+						ocelotType=Ocelot.Type.valueOf(dataPiece.toUpperCase());
+					}
+					if(ocelotType==null)
+					{
+						return;
+					}
+					((Ocelot)ent).setCatType(ocelotType);
+					break;
+				case PAINTING:
+					Art paintType=null;
+					try
+					{
+						paintType=Art.getById(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{
+						paintType=Art.getByName(dataPiece);
+					}
+					if(paintType==null)
+					{
+						return;
+					}
+					((Painting)ent).setArt(paintType);
+					break;
+				case PIG:
+					((Pig)ent).setSaddle(dataPiece.equalsIgnoreCase("saddle")||dataPiece.equalsIgnoreCase("saddled"));
+					break;
+				case PRIMED_TNT:
+					try
+					{
+						((TNTPrimed)ent).setFuseTicks(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{					
+					}
+					break;
+				case SHEEP:
+					((Sheep)ent).setSheared(dataPiece.equalsIgnoreCase("sheared")||dataPiece.equalsIgnoreCase("naked"));
+					break;
+				case SKELETON:
+					((Skeleton)ent).setSkeletonType(dataPiece.equalsIgnoreCase("wither")?Skeleton.SkeletonType.WITHER:Skeleton.SkeletonType.NORMAL);
+					break;
+				case SLIME:
+					try
+					{
+						((Slime)ent).setSize(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{					
+					}
+					break;
+				case VILLAGER:
+					Villager.Profession villagerProfession=null;
+					try
+					{
+						villagerProfession=Villager.Profession.getProfession(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{
+						villagerProfession=Villager.Profession.valueOf(dataPiece.toUpperCase());
+					}
+					if(villagerProfession==null)
+					{
+						return;
+					}
+					((Villager)ent).setProfession(villagerProfession);
+					break;
+			}
 		}
 	}
 }
