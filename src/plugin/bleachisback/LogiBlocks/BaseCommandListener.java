@@ -16,6 +16,7 @@ import net.minecraft.server.v1_5_R3.Packet39AttachEntity;
 import org.bukkit.Art;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
@@ -1101,6 +1102,10 @@ public class BaseCommandListener implements CommandExecutor
 					break;
 				case SHEEP:
 					((Sheep)ent).setSheared(dataPiece.equalsIgnoreCase("sheared")||dataPiece.equalsIgnoreCase("naked"));
+					if(DyeColor.valueOf(dataPiece.toUpperCase())==null)
+					{
+						((Sheep)ent).setColor(DyeColor.valueOf(dataPiece.toUpperCase()));
+					}					
 					break;
 				case SKELETON:
 					((Skeleton)ent).setSkeletonType(dataPiece.equalsIgnoreCase("wither")?Skeleton.SkeletonType.WITHER:Skeleton.SkeletonType.NORMAL);
