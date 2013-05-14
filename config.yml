@@ -80,3 +80,6 @@ commands:
         enabled: true
         aliases:
         - rawmsg
+    setdata:
+        enabled: true
+        aliases:

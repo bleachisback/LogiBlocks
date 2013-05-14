@@ -85,6 +85,7 @@ public class BaseCommandListener implements CommandExecutor
 		minArgs.put("spawn", 2);
 		minArgs.put("message", 3);
 		minArgs.put("rawmessage", 3);
+		minArgs.put("setdata", 3);
 		
 		if(Bukkit.getPluginManager().getPlugin("VoxelSniper")!=null)
 		{
@@ -933,6 +934,10 @@ public class BaseCommandListener implements CommandExecutor
 				rawReceiver.sendMessage(rawBuilder);
 				break;
 				//end rawmessage
+			case "setdata":
+				handleData(LogiBlocksMain.parseEntity(args[1], loc.getWorld()),args[2]);
+				break;
+				//end setdata
 		}
 		return false;
 	}
@@ -990,7 +995,7 @@ public class BaseCommandListener implements CommandExecutor
 	@SuppressWarnings("incomplete-switch")
 	private void handleData(Entity ent, String data)
 	{
-		if(data==null)
+		if(data==null||ent==null)
 		{
 			return;
 		}
@@ -1004,7 +1009,7 @@ public class BaseCommandListener implements CommandExecutor
 			switch(ent.getType())
 			{
 				case CREEPER:
-					((Creeper)ent).setPowered(dataPiece.equalsIgnoreCase("powered"));
+					((Creeper)ent).setPowered(dataPiece.equalsIgnoreCase("powered")||dataPiece.equalsIgnoreCase("charged"));
 					break;
 				case ENDERMAN:
 					Material enderMat=null;
