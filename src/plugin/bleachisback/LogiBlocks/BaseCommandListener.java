@@ -161,10 +161,12 @@ public class BaseCommandListener implements CommandExecutor
 		}		
 		if(!minArgs.containsKey(args[0]))
 		{
+			sender.sendMessage(ChatColor.DARK_RED+"That sub-command doesn't exist!");
 			return false;
 		}
 		if(args.length<minArgs.get(args[0]))
 		{
+			sender.sendMessage(ChatColor.DARK_RED+"That's now how you use that!");
 			return false;
 		}
 		Entity entity=null;
@@ -174,7 +176,8 @@ public class BaseCommandListener implements CommandExecutor
 				entity=LogiBlocksMain.parseEntity(args[1],loc.getWorld());
 				if(entity==null)
 				{
-					return false;
+					sender.sendMessage(ChatColor.DARK_RED+"Entity not found.");
+					return true;
 				}
 				entity.leaveVehicle();
 				break;
@@ -183,7 +186,8 @@ public class BaseCommandListener implements CommandExecutor
 				entity=LogiBlocksMain.parseEntity(args[1],loc.getWorld());
 				if(entity==null)
 				{
-					return false;
+					sender.sendMessage(ChatColor.DARK_RED+"Entity not found.");
+					return true;
 				}
 				if(entity instanceof LivingEntity)
 				{
@@ -199,7 +203,8 @@ public class BaseCommandListener implements CommandExecutor
 				entity=LogiBlocksMain.parseEntity(args[1],loc.getWorld());
 				if(entity==null)
 				{
-					return false;
+					sender.sendMessage(ChatColor.DARK_RED+"Entity not found.");
+					return true;
 				}
 				entity.setVelocity(new Vector(Double.parseDouble(args[2]),Double.parseDouble(args[3]),Double.parseDouble(args[4])));
 				break;
@@ -256,18 +261,23 @@ public class BaseCommandListener implements CommandExecutor
 				//end redstone
 			case "explode":
 				Location expLoc=LogiBlocksMain.parseLocation(args[1], loc);
-				if(args.length>=7)
+				try
 				{
-					loc.getWorld().createExplosion(expLoc.getX(),expLoc.getY(),expLoc.getZ(),Integer.parseInt(args[2]),Boolean.parseBoolean(args[3]), Boolean.parseBoolean(args[4]));
+					if(args.length>=7)
+					{
+						loc.getWorld().createExplosion(expLoc.getX(),expLoc.getY(),expLoc.getZ(),Integer.parseInt(args[2]),Boolean.parseBoolean(args[3]), Boolean.parseBoolean(args[4]));
+					}
+					else if(args.length==6)
+					{
+						loc.getWorld().createExplosion(expLoc,Integer.parseInt(args[2]),Boolean.parseBoolean(args[3]));
+					}
+					else
+					{
+						loc.getWorld().createExplosion(expLoc,Integer.parseInt(args[2]));
+					}
 				}
-				else if(args.length==6)
-				{
-					loc.getWorld().createExplosion(expLoc,Integer.parseInt(args[2]),Boolean.parseBoolean(args[3]));
-				}
-				else
-				{
-					loc.getWorld().createExplosion(expLoc,Integer.parseInt(args[2]));
-				}
+				catch(NumberFormatException e)
+				{}
 				break;
 				//end explode
 			case "equip":
@@ -292,7 +302,8 @@ public class BaseCommandListener implements CommandExecutor
 				Entity equipEntity=LogiBlocksMain.parseEntity(args[1],loc.getWorld());				
 				if(equipEntity==null||!(equipEntity instanceof LivingEntity))
 				{
-					return false;
+					sender.sendMessage(ChatColor.DARK_RED+"Living Entity not found.");
+					return true;
 				}
 				switch(args[2].toLowerCase())
 				{
@@ -586,8 +597,7 @@ public class BaseCommandListener implements CommandExecutor
 								undos=Integer.parseInt(args[2]);
 							}
 							catch(NumberFormatException e)
-							{							
-							}
+							{}
 						}
 						LinkedList<Undo> undoList=sniper.getUndoList();
 						if(undoList.isEmpty())
@@ -658,8 +668,7 @@ public class BaseCommandListener implements CommandExecutor
 									brushSize=Integer.parseInt(att);
 								}
 								catch(NumberFormatException e)
-								{
-								}
+								{}
 							}
 							break;
 						case "p":
@@ -676,8 +685,7 @@ public class BaseCommandListener implements CommandExecutor
 								voxelId=Integer.parseInt(att);
 							}
 							catch(NumberFormatException e)
-							{								
-							}
+							{}
 							break;
 						case "vr":
 							try
@@ -685,8 +693,7 @@ public class BaseCommandListener implements CommandExecutor
 								replaceId=Integer.parseInt(att);
 							}
 							catch(NumberFormatException e)
-							{								
-							}
+							{}
 							break;
 						case "vi":
 							try
@@ -694,8 +701,7 @@ public class BaseCommandListener implements CommandExecutor
 								data=Byte.parseByte(att);
 							}
 							catch(NumberFormatException e)
-							{								
-							}
+							{}
 							break;
 						case "vir":
 							try
@@ -703,8 +709,7 @@ public class BaseCommandListener implements CommandExecutor
 								replaceData=Byte.parseByte(att);
 							}
 							catch(NumberFormatException e)
-							{								
-							}
+							{}
 							break;
 						case "vh":
 							try
@@ -712,8 +717,7 @@ public class BaseCommandListener implements CommandExecutor
 								voxelHeight=Integer.parseInt(att);
 							}
 							catch(NumberFormatException e)
-							{								
-							}
+							{}
 							break;
 						case "bf":
 							blockFace=BlockFace.valueOf(att);
@@ -849,7 +853,8 @@ public class BaseCommandListener implements CommandExecutor
 				Entity tper=LogiBlocksMain.parseEntity(args[1], loc.getWorld());
 				if(tper==null)
 				{
-					return false;
+					sender.sendMessage(ChatColor.DARK_RED+"Entity not found.");
+					return true;
 				}
 				while(tper.getVehicle()!=null)
 				{
@@ -887,8 +892,7 @@ public class BaseCommandListener implements CommandExecutor
 						amount=Integer.parseInt(args[3]);
 					}
 					catch(NumberFormatException e)
-					{						
-					}
+					{}
 				}
 				for(int i=0;i<amount;i++)
 				{
@@ -939,7 +943,7 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end setdata
 		}
-		return false;
+		return true;
 	}
 	
 	private void spawn(String stackString,Location spawnLocation)
@@ -1033,8 +1037,7 @@ public class BaseCommandListener implements CommandExecutor
 						((ExperienceOrb)ent).setExperience(Integer.parseInt(dataPiece));
 					}
 					catch(NumberFormatException e)
-					{					
-					}
+					{}
 					break;
 				case ITEM_FRAME:
 					Material frameMat=null;
@@ -1058,8 +1061,7 @@ public class BaseCommandListener implements CommandExecutor
 						((Slime)ent).setSize(Integer.parseInt(dataPiece));
 					}
 					catch(NumberFormatException e)
-					{					
-					}
+					{}
 					break;
 				case OCELOT:
 					Ocelot.Type ocelotType=null;
@@ -1102,8 +1104,7 @@ public class BaseCommandListener implements CommandExecutor
 						((TNTPrimed)ent).setFuseTicks(Integer.parseInt(dataPiece));
 					}
 					catch(NumberFormatException e)
-					{					
-					}
+					{}
 					break;
 				case SHEEP:
 					((Sheep)ent).setSheared((dataPiece.equalsIgnoreCase("sheared")||dataPiece.equalsIgnoreCase("naked"))&&!((Sheep)ent).isSheared());					
@@ -1112,8 +1113,7 @@ public class BaseCommandListener implements CommandExecutor
 						((Sheep)ent).setColor(DyeColor.valueOf(dataPiece.toUpperCase()));
 					}	
 					catch(IllegalArgumentException e)
-					{						
-					}
+					{}
 					break;
 				case SKELETON:
 					((Skeleton)ent).setSkeletonType(dataPiece.equalsIgnoreCase("wither")?Skeleton.SkeletonType.WITHER:Skeleton.SkeletonType.NORMAL);
@@ -1124,8 +1124,7 @@ public class BaseCommandListener implements CommandExecutor
 						((Slime)ent).setSize(Integer.parseInt(dataPiece));
 					}
 					catch(NumberFormatException e)
-					{					
-					}
+					{}
 					break;
 				case VILLAGER:
 					Villager.Profession villagerProfession=null;
