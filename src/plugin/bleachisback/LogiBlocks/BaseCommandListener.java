@@ -1101,11 +1101,14 @@ public class BaseCommandListener implements CommandExecutor
 					}
 					break;
 				case SHEEP:
-					((Sheep)ent).setSheared(dataPiece.equalsIgnoreCase("sheared")||dataPiece.equalsIgnoreCase("naked"));
-					if(DyeColor.valueOf(dataPiece.toUpperCase())==null)
+					((Sheep)ent).setSheared((dataPiece.equalsIgnoreCase("sheared")||dataPiece.equalsIgnoreCase("naked"))&&!((Sheep)ent).isSheared());					
+					try
 					{
 						((Sheep)ent).setColor(DyeColor.valueOf(dataPiece.toUpperCase()));
-					}					
+					}	
+					catch(IllegalArgumentException e)
+					{						
+					}
 					break;
 				case SKELETON:
 					((Skeleton)ent).setSkeletonType(dataPiece.equalsIgnoreCase("wither")?Skeleton.SkeletonType.WITHER:Skeleton.SkeletonType.NORMAL);
