@@ -85,6 +85,10 @@ public class FilterCommandListener implements CommandExecutor, Listener
 				plugin.log.info("Null detected at command: "+cmdString);
 				continue;
 			}
+			if(cmd.getExecutor()==this)
+			{
+				continue;
+			}
 			executors.put(cmd, cmd.getExecutor());
 			cmd.setExecutor(this);
 		}

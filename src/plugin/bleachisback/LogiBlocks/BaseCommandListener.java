@@ -75,13 +75,14 @@ public class BaseCommandListener implements CommandExecutor
 		minArgs.put("accelerate", 5);
 		minArgs.put("delay", 3);
 		minArgs.put("redstone", 2);
-		minArgs.put("explode", 5);
+		minArgs.put("explode", 3);
 		minArgs.put("equip", 4);
 		minArgs.put("repeat", 4);
 		minArgs.put("setflag", 3);
 		minArgs.put("setglobalflag", 3);
 		minArgs.put("inventory", 2);
 		minArgs.put("teleport", 3);
+		minArgs.put("safeteleport", 3);
 		minArgs.put("spawn", 2);
 		minArgs.put("message", 3);
 		minArgs.put("rawmessage", 3);
@@ -263,11 +264,11 @@ public class BaseCommandListener implements CommandExecutor
 				Location expLoc=LogiBlocksMain.parseLocation(args[1], loc);
 				try
 				{
-					if(args.length>=7)
+					if(args.length>=5)
 					{
 						loc.getWorld().createExplosion(expLoc.getX(),expLoc.getY(),expLoc.getZ(),Integer.parseInt(args[2]),Boolean.parseBoolean(args[3]), Boolean.parseBoolean(args[4]));
 					}
-					else if(args.length==6)
+					else if(args.length==4)
 					{
 						loc.getWorld().createExplosion(expLoc,Integer.parseInt(args[2]),Boolean.parseBoolean(args[3]));
 					}
@@ -855,29 +856,55 @@ public class BaseCommandListener implements CommandExecutor
 				{
 					sender.sendMessage(ChatColor.DARK_RED+"Entity not found.");
 					return true;
-				}
-				while(tper.getVehicle()!=null)
-				{
-					tper=tper.getVehicle();
-				}				
+				}			
 				Location tpLocation=LogiBlocksMain.parseLocation(args[2], tper.getLocation());
-				Entity tpPassenger=tper.getPassenger();
-				tper.eject();
-				tper.teleport(tpLocation);
-				tper.setPassenger(tpPassenger);
-				if(tpPassenger instanceof Player)
-				{
-					final EntityPlayer entPlayer=((CraftPlayer)tpPassenger).getHandle();
-					server.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable()
-					{
-						public void run() 
-						{
-							entPlayer.playerConnection.sendPacket(new Packet39AttachEntity(entPlayer,entPlayer.vehicle));
-						}						
-					}, 1);
-				}
+				teleport(tper,tpLocation);
 				break;
 				//end teleport
+			case "safeteleport":
+				plugin.getLogger().info("Starting out");
+				Entity safeTper=LogiBlocksMain.parseEntity(args[1], loc.getWorld());
+				if(safeTper==null)
+				{
+					sender.sendMessage(ChatColor.DARK_RED+"Entity not found.");
+					return true;
+				}
+				Location safeTpLocation=LogiBlocksMain.parseLocation(args[2], safeTper.getLocation());
+				for(int i=0;i<256;i++)
+				{
+					for(int y=0-i;y<=i;y++)
+					{
+						for(int x=0-i;x<=i;x++)
+						{
+							for(int z=0-i;z<=i;z++)
+							{								
+								Location testSafeTpLocation=safeTpLocation.clone().add(x, y, z);
+								if(testSafeTpLocation.distance(safeTpLocation)>=i&&testSafeTpLocation.distance(safeTpLocation)<i+1)
+								{
+									
+									if(testSafeTpLocation.getBlock().getType()==Material.AIR
+											||testSafeTpLocation.getBlock().getType()==Material.WATER)
+									{
+										if(testSafeTpLocation.getBlock().getRelative(BlockFace.UP).getType()==Material.AIR
+												||testSafeTpLocation.getBlock().getRelative(BlockFace.UP).getType()==Material.WATER)
+										{
+											if(!(testSafeTpLocation.getBlock().getRelative(BlockFace.DOWN).getType()==Material.AIR
+													||testSafeTpLocation.getBlock().getRelative(BlockFace.DOWN).getType()==Material.LAVA
+													||testSafeTpLocation.getBlock().getRelative(BlockFace.DOWN).getType()==Material.CACTUS))
+											{
+												teleport(safeTper,testSafeTpLocation);
+												return true;
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				sender.sendMessage(ChatColor.DARK_RED+"No nearby safe areas could be found!");
+				break;
+				//end safeteleport
 			case "spawn":
 				Location spawnLocation=loc.add(0,1,0);
 				int amount=1;
@@ -944,6 +971,29 @@ public class BaseCommandListener implements CommandExecutor
 				//end setdata
 		}
 		return true;
+	}
+	
+	private void teleport(Entity tper,Location tpLocation)
+	{
+		while(tper.getVehicle()!=null)
+		{
+			tper=tper.getVehicle();
+		}		
+		Entity tpPassenger=tper.getPassenger();
+		tper.eject();
+		tper.teleport(tpLocation);
+		tper.setPassenger(tpPassenger);
+		if(tpPassenger instanceof Player)
+		{
+			final EntityPlayer entPlayer=((CraftPlayer)tpPassenger).getHandle();
+			server.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable()
+			{
+				public void run() 
+				{
+					entPlayer.playerConnection.sendPacket(new Packet39AttachEntity(entPlayer,entPlayer.vehicle));
+				}						
+			}, 1);
+		}
 	}
 	
 	private void spawn(String stackString,Location spawnLocation)
