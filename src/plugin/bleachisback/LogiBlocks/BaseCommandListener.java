@@ -16,7 +16,9 @@ import net.minecraft.server.v1_5_R3.Packet39AttachEntity;
 import org.bukkit.Art;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.DyeColor;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
@@ -32,6 +34,7 @@ import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Ocelot;
@@ -46,6 +49,7 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Vector;
 
 import com.thevoxelbox.voxelsniper.SnipeData;
@@ -721,7 +725,12 @@ public class BaseCommandListener implements CommandExecutor
 							{}
 							break;
 						case "bf":
-							blockFace=BlockFace.valueOf(att);
+							try
+							{
+								blockFace=BlockFace.valueOf(att);
+							}
+							catch(IllegalArgumentException e)
+							{}							
 							if(blockFace==null)
 							{
 								blockFace=BlockFace.UP;
@@ -862,7 +871,6 @@ public class BaseCommandListener implements CommandExecutor
 				break;
 				//end teleport
 			case "safeteleport":
-				plugin.getLogger().info("Starting out");
 				Entity safeTper=LogiBlocksMain.parseEntity(args[1], loc.getWorld());
 				if(safeTper==null)
 				{
@@ -1089,6 +1097,82 @@ public class BaseCommandListener implements CommandExecutor
 					catch(NumberFormatException e)
 					{}
 					break;
+				case FIREWORK:
+					Firework firework=(Firework)ent;
+					FireworkMeta meta=firework.getFireworkMeta();
+					if(dataPiece.contains("="))
+					{
+						switch(dataPiece.substring(0,dataPiece.indexOf("=")))
+						{
+							case "p":
+							case "power":
+								try
+								{
+									meta.setPower(Integer.parseInt(dataPiece.substring(dataPiece.indexOf("=")+1, dataPiece.length())));
+								}
+								catch(NumberFormatException e)
+								{}
+								break;
+							case "e":
+							case "effect":
+								String[] effect=dataPiece.substring(dataPiece.indexOf("=")+1, dataPiece.length()).split("\\|");
+								FireworkEffect.Builder builder=FireworkEffect.builder();
+								boolean color=false;
+								for(String effectPiece:effect)
+								{
+									if(effectPiece.equalsIgnoreCase("flicker"))
+									{
+										builder.withFlicker();
+									}
+									else if(effectPiece.equalsIgnoreCase("trail"))
+									{
+										builder.withTrail();
+									}
+									else if(effectPiece.contains("="))
+									{
+										switch(effectPiece.substring(0,effectPiece.indexOf("=")))
+										{
+											case "e":
+											case "effect":
+												try
+												{
+													builder.with(FireworkEffect.Type.valueOf(effectPiece.substring(effectPiece.indexOf("=")+1,effectPiece.length()).toUpperCase()));
+												}
+												catch(IllegalArgumentException _e)
+												{}
+												break;
+											case "c":
+											case "color":
+												try
+												{
+													builder.withColor(Color.fromRGB(Integer.parseInt(effectPiece.substring(effectPiece.indexOf("=")+1,effectPiece.length()), 16)));
+													color=true;
+												}
+												catch(NumberFormatException e)
+												{}
+												break;
+											case "f":
+											case "fade":
+												try
+												{
+													builder.withFade(Color.fromRGB(Integer.parseInt(effectPiece.substring(effectPiece.indexOf("=")+1,effectPiece.length()), 16)));
+												}
+												catch(NumberFormatException e)
+												{}
+												break;
+										}
+									}
+								}
+								if(!color)
+								{
+									builder.withColor(Color.WHITE);
+								}
+								meta.addEffect(builder.build());
+								break;
+						}
+					}
+					firework.setFireworkMeta(meta);
+					break;
 				case ITEM_FRAME:
 					Material frameMat=null;
 					try
@@ -1121,7 +1205,13 @@ public class BaseCommandListener implements CommandExecutor
 					}
 					catch(NumberFormatException e)
 					{
-						ocelotType=Ocelot.Type.valueOf(dataPiece.toUpperCase());
+						try
+						{
+							ocelotType=Ocelot.Type.valueOf(dataPiece.toUpperCase());
+						}
+						catch(IllegalArgumentException _e)
+						{}
+						
 					}
 					if(ocelotType==null)
 					{
@@ -1184,7 +1274,12 @@ public class BaseCommandListener implements CommandExecutor
 					}
 					catch(NumberFormatException e)
 					{
-						villagerProfession=Villager.Profession.valueOf(dataPiece.toUpperCase());
+						try
+						{
+							villagerProfession=Villager.Profession.valueOf(dataPiece.toUpperCase());
+						}
+						catch(IllegalArgumentException _e)
+						{}
 					}
 					if(villagerProfession==null)
 					{
