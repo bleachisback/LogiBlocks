@@ -3,6 +3,7 @@ package plugin.bleachisback.LogiBlocks;
 import java.util.HashMap;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
@@ -31,7 +32,7 @@ public class FilterCommandListener implements CommandExecutor, Listener
 				continue;
 			}
 			for(String cmdString:_plugin.getDescription().getCommands().keySet())
-			{
+			{				
 				PluginCommand cmd=Bukkit.getPluginCommand(cmdString);
 				if(cmd==null)
 				{
@@ -67,6 +68,12 @@ public class FilterCommandListener implements CommandExecutor, Listener
 		{
 			return false;
 		}
+		else if(executors.get(cmd)==this)
+		{
+			plugin.log.info("Something went wrong! e1");
+			sender.sendMessage(ChatColor.DARK_RED+"Something went wrong! Please notify your server admin.");
+			return true;
+		}
 		return executors.get(cmd).onCommand(sender, cmd, alias, args);
 	}
 
@@ -82,7 +89,6 @@ public class FilterCommandListener implements CommandExecutor, Listener
 			PluginCommand cmd=Bukkit.getPluginCommand(cmdString);
 			if(cmd==null)
 			{
-				plugin.log.info("Null detected at command: "+cmdString);
 				continue;
 			}
 			if(cmd.getExecutor()==this)

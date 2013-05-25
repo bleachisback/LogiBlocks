@@ -73,8 +73,10 @@ public class LogiBlocksMain extends JavaPlugin
 		getCommand("command").setExecutor(new BaseCommandListener(this));
 		getCommand("logicif").setExecutor(new LogiCommandListener(this));
 		
-		pm.registerEvents(new FilterCommandListener(this),this);
-		
+		if(!config.getBoolean("disable-filtering",false))
+		{
+			pm.registerEvents(new FilterCommandListener(this),this);
+		}
 		if(config.getBoolean("allow-crafting", true))
 		{
 			pm.registerEvents(new LogiBlocksCraftListener(this), this);
