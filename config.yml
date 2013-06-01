@@ -19,7 +19,11 @@ voxelsniper-blacklist:
 - warp
 - voltmeter
 listen-for-redstone: true
-disable-filtering: false
+disable-filtering:
+    plugins:
+    - example
+    commands:
+    - example
 commands:
     eject:
         enabled: true

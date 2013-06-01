@@ -31,12 +31,19 @@ public class FilterCommandListener implements CommandExecutor, Listener
 			{
 				continue;
 			}
+			else if(plugin.config.getStringList("disable-filtering.plugins").contains(_plugin.getName()))
+			{
+				continue;
+			}
 			for(String cmdString:_plugin.getDescription().getCommands().keySet())
 			{				
 				PluginCommand cmd=Bukkit.getPluginCommand(cmdString);
 				if(cmd==null)
 				{
-					plugin.log.info("Null detected at command: "+cmdString);
+					continue;
+				}
+				else if(plugin.config.getStringList("disable-filtering.commands").contains(cmdString))
+				{
 					continue;
 				}
 				executors.put(cmd, cmd.getExecutor());
