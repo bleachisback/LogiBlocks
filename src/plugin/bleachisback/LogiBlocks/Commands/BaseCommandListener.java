@@ -1,4 +1,4 @@
-package plugin.bleachisback.LogiBlocks;
+package plugin.bleachisback.LogiBlocks.Commands;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -52,6 +52,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Vector;
 
+import plugin.bleachisback.LogiBlocks.FlagFailureException;
+import plugin.bleachisback.LogiBlocks.LogiBlocksMain;
+
 import com.thevoxelbox.voxelsniper.SnipeData;
 import com.thevoxelbox.voxelsniper.Sniper;
 import com.thevoxelbox.voxelsniper.SniperBrushes;
@@ -94,18 +97,18 @@ public class BaseCommandListener implements CommandExecutor
 		
 		if(Bukkit.getPluginManager().getPlugin("VoxelSniper")!=null)
 		{
-			plugin.log.info("VoxelSniper detected - adding support");
+			plugin.getLogger().info("VoxelSniper detected - adding support");
 			minArgs.put("voxelsniper", 1);
 		}
 		
 		//Load aliases and disabled commands from config
 		for(String name:minArgs.keySet().toArray(new String[0]))
 		{
-			if(plugin.config.contains("commands."+name))
+			if(plugin.getConfig().contains("commands."+name))
 			{
-				if(plugin.config.getBoolean("commands."+name+".enabled"))
+				if(plugin.getConfig().getBoolean("commands."+name+".enabled"))
 				{
-					for(String alias:plugin.config.getStringList("commands."+name+".aliases"))
+					for(String alias:plugin.getConfig().getStringList("commands."+name+".aliases"))
 					{
 						minArgs.put(alias.toLowerCase(), minArgs.get(name));
 						aliases.put(alias.toLowerCase(), name);
@@ -119,11 +122,11 @@ public class BaseCommandListener implements CommandExecutor
 			}
 			else
 			{
-				plugin.log.info("No profile detected for command: "+name);
-				plugin.config.set("commands."+name+".enabled", true);
-				plugin.config.set("commands."+name+".aliases", "");
+				plugin.getLogger().info("No profile detected for command: "+name);
+				plugin.getConfig().set("commands."+name+".enabled", true);
+				plugin.getConfig().set("commands."+name+".aliases", "");
 				plugin.saveConfig();
-				plugin.log.info("Default profile for "+name+" created");
+				plugin.getLogger().info("Default profile for "+name+" created");
 			}
 		}
 		
@@ -361,17 +364,17 @@ public class BaseCommandListener implements CommandExecutor
 			case "setflag":
 				if(args[2].toLowerCase().equals("true"))
 				{
-					plugin.flagConfig.set("local."+block.getName()+"."+args[1], true);
+					plugin.getFlagConfig().set("local."+block.getName()+"."+args[1], true);
 				}
 				else if(args[2].toLowerCase().equals("false"))
 				{
-					plugin.flagConfig.set("local."+block.getName()+"."+args[1], false);
+					plugin.getFlagConfig().set("local."+block.getName()+"."+args[1], false);
 				}
-				else if(plugin.flags.containsKey(args[2]))
+				else if(plugin.getFlagListeners().containsKey(args[2]))
 				{					
 					try 
 					{
-						plugin.flagConfig.set("local."+block.getName()+"."+args[1], plugin.flags.get(args[2]).onFlag(args[2], Arrays.copyOfRange(args, 3, args.length+1), (BlockCommandSender) sender));
+						plugin.getFlagConfig().set("local."+block.getName()+"."+args[1], plugin.getFlagListeners().get(args[2]).onFlag(args[2], Arrays.copyOfRange(args, 3, args.length+1), (BlockCommandSender) sender));
 					} 
 					catch (FlagFailureException e) 
 					{
@@ -380,7 +383,7 @@ public class BaseCommandListener implements CommandExecutor
 				}
 				try 
 				{
-					plugin.flagConfig.save(LogiBlocksMain.flagFile);
+					plugin.getFlagConfig().save(plugin.getFlagFile());
 				} 
 				catch (IOException e) 
 				{
@@ -391,17 +394,17 @@ public class BaseCommandListener implements CommandExecutor
 			case "setglobalflag":
 				if(args[2].toLowerCase().equals("true"))
 				{
-					plugin.flagConfig.set("global."+args[1], true);
+					plugin.getFlagConfig().set("global."+args[1], true);
 				}
 				else if(args[2].toLowerCase().equals("false"))
 				{
-					plugin.flagConfig.set("global."+args[1], false);
+					plugin.getFlagConfig().set("global."+args[1], false);
 				}
-				else if(plugin.flags.containsKey(args[2]))
+				else if(plugin.getFlagListeners().containsKey(args[2]))
 				{					
 					try 
 					{
-						plugin.flagConfig.set("global."+args[1], plugin.flags.get(args[2]).onFlag(args[2], Arrays.copyOfRange(args, 3, args.length+1), (BlockCommandSender) sender));
+						plugin.getFlagConfig().set("global."+args[1], plugin.getFlagListeners().get(args[2]).onFlag(args[2], Arrays.copyOfRange(args, 3, args.length+1), (BlockCommandSender) sender));
 					} 
 					catch (FlagFailureException e) 
 					{
@@ -410,7 +413,7 @@ public class BaseCommandListener implements CommandExecutor
 				}
 				try 
 				{
-					plugin.flagConfig.save(LogiBlocksMain.flagFile);
+					plugin.getFlagConfig().save(plugin.getFlagFile());
 				} 
 				catch (IOException e) 
 				{
@@ -765,7 +768,7 @@ public class BaseCommandListener implements CommandExecutor
 					Brush brush=(Brush) SniperBrushes.getBrushInstance(brushName);
 					
 					//Check if brush is on blacklist
-					List<String> blacklist=plugin.config.getStringList("voxelsniper-blacklist");
+					List<String> blacklist=plugin.getConfig().getStringList("voxelsniper-blacklist");
 					for(String blackbrush:blacklist)
 					{
 						if(blackbrush.equalsIgnoreCase(brush.getName()))

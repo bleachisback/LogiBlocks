@@ -33,6 +33,8 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import plugin.bleachisback.LogiBlocks.Commands.BaseCommandListener;
+import plugin.bleachisback.LogiBlocks.Commands.LogiCommandListener;
 import plugin.bleachisback.LogiBlocks.Listeners.LogiBlocksCraftListener;
 import plugin.bleachisback.LogiBlocks.Listeners.LogiBlocksInteractListener;
 import plugin.bleachisback.LogiBlocks.Listeners.LogiBlocksRedstoneListener;
@@ -48,7 +50,7 @@ public class LogiBlocksMain extends JavaPlugin
 	protected FileConfiguration flagConfig;
 	protected Configuration config;
 	
-	protected static File flagFile;
+	protected File flagFile;
 	protected HashMap<String, FlagListener> flags= new HashMap<String, FlagListener>();	
 	
 	private Entity lastRedstone=null;
@@ -477,6 +479,16 @@ public class LogiBlocksMain extends JavaPlugin
 	public FileConfiguration getFlagConfig()
 	{
 		return flagConfig;
+	}
+	
+	public File getFlagFile()
+	{
+		return flagFile;
+	}
+	
+	public HashMap<String,FlagListener> getFlagListeners()
+	{
+		return flags;
 	}
 	
 	public static ItemStack parseItemStack(String itemString)

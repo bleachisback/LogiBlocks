@@ -1,10 +1,14 @@
-package plugin.bleachisback.LogiBlocks;
+package plugin.bleachisback.LogiBlocks.Commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+
+import plugin.bleachisback.LogiBlocks.FlagFailureException;
+import plugin.bleachisback.LogiBlocks.FlagListener;
+import plugin.bleachisback.LogiBlocks.LogiBlocksMain;
 
 public class LogiCommandListener implements CommandExecutor
 {
@@ -97,7 +101,7 @@ public class LogiCommandListener implements CommandExecutor
 			return false;
 		}
 		//Checks to see if any plugin has registered that flag
-		FlagListener listener=plugin.flags.get(args[0].toLowerCase());
+		FlagListener listener=plugin.getFlagListeners().get(args[0].toLowerCase());
 		if(listener==null)
 		{
 			return false;

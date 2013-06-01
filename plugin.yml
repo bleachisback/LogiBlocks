@@ -10,6 +10,10 @@ commands:
         description: If the given flag returns true, executes one command, otherwise it executes the other.
         usage: "/<command> <flag> [args] ? [command if true] : [command if false]"
         aliases: if
+    logicfor:
+        description: Allows you to use a command multiple times, based on an @e or @p variable.
+        usage: /<command> <variable> <repeated command>...
+        aliases: for
     phantom:
         permission: c.hidden.phantom
 permissions:
