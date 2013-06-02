@@ -34,6 +34,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import plugin.bleachisback.LogiBlocks.Commands.BaseCommandListener;
+import plugin.bleachisback.LogiBlocks.Commands.ForCommandListener;
 import plugin.bleachisback.LogiBlocks.Commands.LogiCommandListener;
 import plugin.bleachisback.LogiBlocks.Listeners.LogiBlocksCraftListener;
 import plugin.bleachisback.LogiBlocks.Listeners.LogiBlocksInteractListener;
@@ -74,11 +75,10 @@ public class LogiBlocksMain extends JavaPlugin
 		
 		getCommand("command").setExecutor(new BaseCommandListener(this));
 		getCommand("logicif").setExecutor(new LogiCommandListener(this));
+		getCommand("logicfor").setExecutor(new ForCommandListener());
 		
-		if(!config.getBoolean("disable-filtering",false))
-		{
-			pm.registerEvents(new FilterCommandListener(this),this);
-		}
+		pm.registerEvents(new FilterCommandListener(this),this);
+		
 		if(config.getBoolean("allow-crafting", true))
 		{
 			pm.registerEvents(new LogiBlocksCraftListener(this), this);
