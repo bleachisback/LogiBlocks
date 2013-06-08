@@ -1062,6 +1062,8 @@ public class BaseCommandListener implements CommandExecutor
 		}
 	}
 	
+	private int currentRainbow=0;
+	
 	@SuppressWarnings("incomplete-switch")
 	private void handleData(Entity ent, String data)
 	{
@@ -1261,7 +1263,17 @@ public class BaseCommandListener implements CommandExecutor
 						((Sheep)ent).setColor(DyeColor.valueOf(dataPiece.toUpperCase()));
 					}	
 					catch(IllegalArgumentException e)
-					{}
+					{						
+						if(dataPiece.equalsIgnoreCase("rainbow"))
+						{
+							((Sheep)ent).setColor(DyeColor.values()[currentRainbow]);
+							currentRainbow++;
+							if(currentRainbow>=DyeColor.values().length)
+							{
+								currentRainbow=0;
+							}
+						}
+					}
 					break;
 				case SKELETON:
 					((Skeleton)ent).setSkeletonType(dataPiece.equalsIgnoreCase("wither")?Skeleton.SkeletonType.WITHER:Skeleton.SkeletonType.NORMAL);
