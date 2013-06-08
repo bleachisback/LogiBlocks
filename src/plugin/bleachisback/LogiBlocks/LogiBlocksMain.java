@@ -288,24 +288,26 @@ public class LogiBlocksMain extends JavaPlugin
 								{
 									continue;
 								}
-								switch(args1.substring(0,args1.indexOf("=")))
+								try
 								{
-									case "t":
+									switch(args1.substring(0,args1.indexOf("=")))
+									{
+										case "t":
 										type=EntityType.fromName(args1.substring(2,args1.length()));
 										break;
-									case "x":
-										x=Double.parseDouble(args1.substring(2,args1.length()));
-										break;
-									case "y":
-										y=Double.parseDouble(args1.substring(2,args1.length()));
-										break;
-									case "z":
-										z=Double.parseDouble(args1.substring(2,args1.length()));
-										break;
-									case "loc":
-										String[] locArray=args1.substring(2,args1.length()).split("\\|");
-										switch(locArray.length)
-										{
+										case "x":
+											x=Double.parseDouble(args1.substring(2,args1.length()));
+											break;
+										case "y":
+											y=Double.parseDouble(args1.substring(2,args1.length()));
+											break;
+										case "z":
+											z=Double.parseDouble(args1.substring(2,args1.length()));
+											break;
+										case "loc":
+											String[] locArray=args1.substring(2,args1.length()).split("\\|");
+											switch(locArray.length)
+											{
 											default:
 											case 3:
 												z=Double.parseDouble(locArray[2]);
@@ -316,21 +318,24 @@ public class LogiBlocksMain extends JavaPlugin
 												break;
 											case 0:
 												break;
-										}
-										break;
-									case "r":
-										r=Integer.parseInt(args1.substring(2,args1.length()));
-										break;
-									case "rm":
-										rm=Integer.parseInt(args1.substring(3,args1.length()));
-										break;
-									case "c":
-										c=Integer.parseInt(args1.substring(2,args1.length()));
-										break;
-									case "rand":
-										rand=Boolean.parseBoolean(args1.substring(5,args1.length()));
-										break;
+											}
+											break;
+										case "r":
+											r=Integer.parseInt(args1.substring(2,args1.length()));
+											break;
+										case "rm":
+											rm=Integer.parseInt(args1.substring(3,args1.length()));
+											break;
+										case "c":
+											c=Integer.parseInt(args1.substring(2,args1.length()));
+											break;
+										case "rand":
+											rand=Boolean.parseBoolean(args1.substring(5,args1.length()));
+											break;
+									}
 								}
+								catch(NumberFormatException e)
+								{}
 							}
 						}
 

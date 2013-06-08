@@ -77,7 +77,7 @@ public class FilterCommandListener implements CommandExecutor, Listener
 		}
 		else if(executors.get(cmd)==this)
 		{
-			plugin.log.info("Something went wrong! e1");
+			plugin.log.info("Something went wrong! e1 - "+cmd.getName());
 			sender.sendMessage(ChatColor.DARK_RED+"Something went wrong! Please notify your server admin.");
 			return true;
 		}

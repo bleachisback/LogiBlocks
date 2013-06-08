@@ -1,6 +1,6 @@
 name: LogiBlocks
 main: plugin.bleachisback.LogiBlocks.LogiBlocksMain
-version: 1.04
+version: 1.05
 commands:
     command:
         description: Additional command block commands

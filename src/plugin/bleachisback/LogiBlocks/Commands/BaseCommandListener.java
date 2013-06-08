@@ -881,26 +881,31 @@ public class BaseCommandListener implements CommandExecutor
 					return true;
 				}
 				Location safeTpLocation=LogiBlocksMain.parseLocation(args[2], safeTper.getLocation());
-				for(int i=0;i<256;i++)
+				for(int i=0;i<64;i++)
 				{
-					for(int y=0-i;y<=i;y++)
+					loop: for(int y=0-i;y<=i;y++)
 					{
 						for(int x=0-i;x<=i;x++)
 						{
 							for(int z=0-i;z<=i;z++)
 							{								
 								Location testSafeTpLocation=safeTpLocation.clone().add(x, y, z);
+								if(testSafeTpLocation.getBlockY()>256||testSafeTpLocation.getBlockY()<2)
+								{
+									continue loop;
+								}
 								if(testSafeTpLocation.distance(safeTpLocation)>=i&&testSafeTpLocation.distance(safeTpLocation)<i+1)
 								{
 									
 									if(testSafeTpLocation.getBlock().getType()==Material.AIR
-											||testSafeTpLocation.getBlock().getType()==Material.WATER)
+											||testSafeTpLocation.getBlock().getType()==Material.STATIONARY_WATER)
 									{
 										if(testSafeTpLocation.getBlock().getRelative(BlockFace.UP).getType()==Material.AIR
-												||testSafeTpLocation.getBlock().getRelative(BlockFace.UP).getType()==Material.WATER)
+												||testSafeTpLocation.getBlock().getRelative(BlockFace.UP).getType()==Material.STATIONARY_WATER)
 										{
 											if(!(testSafeTpLocation.getBlock().getRelative(BlockFace.DOWN).getType()==Material.AIR
 													||testSafeTpLocation.getBlock().getRelative(BlockFace.DOWN).getType()==Material.LAVA
+													||testSafeTpLocation.getBlock().getRelative(BlockFace.DOWN).getType()==Material.STATIONARY_LAVA
 													||testSafeTpLocation.getBlock().getRelative(BlockFace.DOWN).getType()==Material.CACTUS))
 											{
 												teleport(safeTper,testSafeTpLocation);
