@@ -1115,7 +1115,11 @@ public class BaseCommandListener implements CommandExecutor
 			}
 			if(type==null)
 			{
-				continue;
+				type=LogiBlocksMain.entFromAlias(typeString);
+				if(type==null)
+				{
+					continue;
+				}
 			}
 			Entity ent=spawnLocation.getWorld().spawnEntity(spawnLocation, type);			
 			handleData(ent,dataString);

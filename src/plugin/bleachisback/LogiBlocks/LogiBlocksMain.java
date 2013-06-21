@@ -294,6 +294,10 @@ public class LogiBlocksMain extends JavaPlugin
 									{
 										case "t":
 										type=EntityType.fromName(args1.substring(2,args1.length()));
+										if(type==null)
+										{
+											type=entFromAlias(args1.substring(2,args1.length()));
+										}
 										break;
 										case "x":
 											x=Double.parseDouble(args1.substring(2,args1.length()));
@@ -740,5 +744,41 @@ public class LogiBlocksMain extends JavaPlugin
 			return;
 		}
 		flags.put(flag.toLowerCase().replace(" ", "_"), listener);
+	}
+	
+	public static EntityType entFromAlias(String alias)
+	{
+		switch(alias.toLowerCase())
+		{
+			case "firework":
+				return EntityType.FIREWORK;
+			case "pearl":
+			case "enderpearl":
+				return EntityType.ENDER_PEARL;
+			case "endersignal":
+				return EntityType.ENDER_SIGNAL;
+			case "xpbottle":
+				return EntityType.THROWN_EXP_BOTTLE;
+			case "tnt":
+				return EntityType.PRIMED_TNT;
+			case "minecart":
+				return EntityType.MINECART;
+			case "pigman":
+				return EntityType.PIG_ZOMBIE;
+			case "magmaslime":
+			case "redslime":
+			case "lavacube":
+			case "magmacube":
+				return EntityType.MAGMA_CUBE;
+			case "wither":
+				return EntityType.WITHER;
+			case "ocelot":
+				return EntityType.OCELOT;
+			case "irongolem":
+			case "golem":
+				return EntityType.IRON_GOLEM;
+			default:
+				return null;
+		}
 	}
 }
