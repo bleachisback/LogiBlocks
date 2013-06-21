@@ -94,6 +94,7 @@ public class BaseCommandListener implements CommandExecutor
 		minArgs.put("message", 3);
 		minArgs.put("rawmessage", 3);
 		minArgs.put("setdata", 3);
+		minArgs.put("sethealth", 3);
 		
 		if(Bukkit.getPluginManager().getPlugin("VoxelSniper")!=null)
 		{
@@ -985,6 +986,70 @@ public class BaseCommandListener implements CommandExecutor
 				handleData(LogiBlocksMain.parseEntity(args[1], loc.getWorld()),args[2]);
 				break;
 				//end setdata
+			case "sethealth":
+				Entity hpEnt = LogiBlocksMain.parseEntity(args[1], loc.getWorld());
+				if(hpEnt == null)
+				{
+					sender.sendMessage(ChatColor.RED+"Entity not found.");
+					return true;
+				}
+				if(!(hpEnt instanceof LivingEntity))
+				{
+					sender.sendMessage(ChatColor.RED+"That's not living!");
+					return true;
+				}
+				int setHp=0;
+				try
+				{
+					switch(args[2].charAt(0))
+					{
+						case '+':
+							setHp=((LivingEntity)hpEnt).getHealth()+Integer.parseInt(args[2].replace("+",""));
+							plugin.getLogger().info(setHp+"");
+							break;
+						case '-':
+							setHp=((LivingEntity)hpEnt).getHealth()-Integer.parseInt(args[2].replace("-",""));
+							plugin.getLogger().info(setHp+"");
+							break;
+						default:
+							try
+							{
+								setHp=Integer.parseInt(args[2]);
+							}
+							catch(NumberFormatException e)
+							{
+								Entity _hpEnt = LogiBlocksMain.parseEntity(args[2], loc.getWorld());
+								if(_hpEnt == null)
+								{						
+									sender.sendMessage(args[2]+ChatColor.RED+" is not a valid number or organism");
+									return true;
+								}
+								else if(!(_hpEnt instanceof LivingEntity))
+								{
+									sender.sendMessage(args[2]+ChatColor.RED+" is not a valid number or organism");
+									return true;
+								}
+								setHp=((LivingEntity)_hpEnt).getHealth();					
+							}
+							break;
+					}
+				}
+				catch(NumberFormatException e)
+				{
+					sender.sendMessage(args[2]+ChatColor.RED+" is not a valid number.");
+					return true;
+				}				
+				if(setHp<0)
+				{
+					setHp=0;
+				}
+				else if(setHp>((LivingEntity)hpEnt).getMaxHealth())
+				{
+					setHp=((LivingEntity)hpEnt).getMaxHealth();
+				}
+				((LivingEntity)hpEnt).setHealth(setHp);
+				break;
+				//end sethealth
 		}
 		return true;
 	}

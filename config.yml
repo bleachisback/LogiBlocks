@@ -92,3 +92,7 @@ commands:
     setdata:
         enabled: true
         aliases:
+    sethealth:
+        enabled: true
+        aliases:
+        - sethp
