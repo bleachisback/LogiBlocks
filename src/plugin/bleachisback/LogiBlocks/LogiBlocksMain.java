@@ -14,6 +14,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
@@ -633,9 +634,13 @@ public class LogiBlocksMain extends JavaPlugin
 			double z=0;
 			float yaw=0;
 			float pitch=0;
-			boolean rand=false;
-			int radius=100;
-			int minRadius=0;
+			int randX=0;
+			int minX=0;
+			int randY=0;
+			int minY=0;
+			int randZ=0;
+			int minZ=0;
+			boolean floor=false;
 			
 			if(def!=null)
 			{
@@ -649,86 +654,123 @@ public class LogiBlocksMain extends JavaPlugin
 			
 			for(String arg:locString.substring(locString.indexOf("[")+1,locString.indexOf("]")).split(","))
 			{
-				if(arg.length()<3||!arg.contains("="))
+				if(arg.length()<3)
 				{
 					continue;
 				}
-				if(arg.length()<=arg.indexOf("="))
+				if(arg.contains("="))
 				{
-					continue;
-				}				
-				switch(arg.substring(0,arg.indexOf("=")))
-				{
-					case "w":
-					case "world":
-						world=Bukkit.getWorld(arg.substring(arg.indexOf("=")+1,arg.length()));
-						break;
-					case "c":
-					case "coords":
-					case "coordinates":
-						String[] coords=arg.substring(arg.indexOf("=")+1,arg.length()).split("\\|");
-						switch(coords.length)
-						{
-							default:
-							case 3:
-								z=Double.parseDouble(coords[2]);
-							case 2:
-								y=Double.parseDouble(coords[1]);
-							case 1:
-								x=Double.parseDouble(coords[0]);
-								break;
-							case 0:
-								break;
-						}
-						break;
-					case "x":
-						x=Double.parseDouble(arg.substring(arg.indexOf("=")+1,arg.length()));
-						break;
-					case "y":
-						y=Double.parseDouble(arg.substring(arg.indexOf("=")+1,arg.length()));
-						break;
-					case "z":
-						z=Double.parseDouble(arg.substring(arg.indexOf("=")+1,arg.length()));
-						break;
-					case "p":
-					case "pitch":
-						pitch=Float.parseFloat(arg.substring(arg.indexOf("=")+1,arg.length()));
-						break;
-					case "ya":
-					case "yaw":
-						yaw=Float.parseFloat(arg.substring(arg.indexOf("=")+1,arg.length()));
-						break;
-					case "rand":
-						rand=Boolean.parseBoolean(arg.substring(arg.indexOf("=")+1,arg.length()));
-						break;
-					case "r":
-						radius=Integer.parseInt(arg.substring(arg.indexOf("=")+1,arg.length()));
-						break;
-					case "mr":
-						minRadius=Integer.parseInt(arg.substring(arg.indexOf("=")+1,arg.length()));
-						break;
-				}				
-			}
-			Location location=new Location(world,x,y,z,yaw,pitch);
-			if(rand)
-			{
-				Random randGen=new Random();
-				while(true)
-				{
-					double _x=randGen.nextInt(radius*2)-radius+x;
-					double _y=randGen.nextInt(radius*2)-radius+y;
-					double _z=randGen.nextInt(radius*2)-radius+z;
-					Location randLoc=new Location(world,_x,_y,_z,yaw,pitch);
-					if(randLoc.distance(location)<=radius&&randLoc.distance(location)>=minRadius)
+					if(arg.length()<=arg.indexOf("="))
 					{
-						return randLoc;
+						continue;
+					}	
+				}
+				try
+				{
+					switch(arg.substring(0,arg.contains("=")?arg.indexOf("="):arg.length()))
+					{
+						case "w":
+						case "world":
+							world=Bukkit.getWorld(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "c":
+						case "coords":
+						case "coordinates":
+							String[] coords=arg.substring(arg.indexOf("=")+1,arg.length()).split("\\|");
+							switch(coords.length)
+							{
+								default:
+								case 3:
+									z=Double.parseDouble(coords[2]);
+								case 2:
+									y=Double.parseDouble(coords[1]);
+								case 1:
+									x=Double.parseDouble(coords[0]);
+									break;
+								case 0:
+									break;
+							}
+							break;
+						case "x":
+							x=Double.parseDouble(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "y":
+							y=Double.parseDouble(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "z":
+							z=Double.parseDouble(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "p":
+						case "pitch":
+							pitch=Float.parseFloat(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "yaw":
+							yaw=Float.parseFloat(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "randx":
+						case "rx":
+							randX=Integer.parseInt(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "minx":
+						case "mx":
+							minX=Integer.parseInt(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "randy":
+						case "ry":
+							randY=Integer.parseInt(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "miny":
+						case "my":
+							minY=Integer.parseInt(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "randz":
+						case "rz":
+							randZ=Integer.parseInt(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "minz":
+						case "mz":
+							minZ=Integer.parseInt(arg.substring(arg.indexOf("=")+1,arg.length()));
+							break;
+						case "floor":
+						case "f":
+							floor=true;
+							break;
 					}
-				}				
+				}
+				catch(NumberFormatException e)
+				{}
 			}
-			else
+			
+			if(minX>randX)
 			{
-				return location;
+				minX=randX;
 			}
+			if(minY>randY)
+			{
+				minY=randY;
+			}
+			if(minZ>randZ)
+			{
+				minZ=randZ;
+			}
+			
+			x=x+(Math.random()*(randX-minX)+minX)*(Math.random()>0.5?1:-1);
+			y=y+(Math.random()*(randY-minY)+minY)*(Math.random()>0.5?1:-1);
+			z=z+(Math.random()*(randZ-minZ)+minZ)*(Math.random()>0.5?1:-1);
+			
+			Location location=new Location(world,x,y,z,yaw,pitch);	
+			
+			while(floor && location.getBlock().getType()==Material.AIR && location.getBlock().getRelative(BlockFace.DOWN).getType()==Material.AIR)
+			{
+				location.subtract(0,1,0);
+			}
+			
+			while(floor && (location.getBlock().getType()!=Material.AIR || location.getBlock().getRelative(BlockFace.UP).getType()!=Material.AIR))
+			{
+				location.add(0,1,0);
+			}
+			
+			return location;
 		}
 		else if(parseEntity(locString,def.getWorld())!=null)
 		{
