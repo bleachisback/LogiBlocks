@@ -1005,11 +1005,9 @@ public class BaseCommandListener implements CommandExecutor
 					{
 						case '+':
 							setHp=((LivingEntity)hpEnt).getHealth()+Integer.parseInt(args[2].replace("+",""));
-							plugin.getLogger().info(setHp+"");
 							break;
 						case '-':
 							setHp=((LivingEntity)hpEnt).getHealth()-Integer.parseInt(args[2].replace("-",""));
-							plugin.getLogger().info(setHp+"");
 							break;
 						default:
 							try
