@@ -353,13 +353,16 @@ public class BaseCommandListener implements CommandExecutor
 						server.dispatchCommand(sender, $command1);
 					}
 				}, 0, Integer.parseInt(args[1]));
-				server.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable()
+				if(Integer.parseInt(args[2])!=0 || !plugin.getConfig().getBoolean("allow-infinite-loops"))
 				{
-					public void run()
+					server.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable()
 					{
-						server.getScheduler().cancelTask(id);
-					}
-				}, Integer.parseInt(args[2])*Integer.parseInt(args[1]));
+						public void run()
+						{
+							server.getScheduler().cancelTask(id);
+						}
+					}, Integer.parseInt(args[2])*Integer.parseInt(args[1]));
+				}				
 				break;
 				//end repeat
 			case "setflag":

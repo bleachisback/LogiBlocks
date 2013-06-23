@@ -24,6 +24,7 @@ disable-filtering:
     - example
     commands:
     - example
+allow-infinite-loops: false
 commands:
     eject:
         enabled: true
