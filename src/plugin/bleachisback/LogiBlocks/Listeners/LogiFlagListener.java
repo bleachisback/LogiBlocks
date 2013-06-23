@@ -340,6 +340,21 @@ public class LogiFlagListener implements FlagListener
 				}
 				return entity1.getVehicle()!=null;
 				//end isPassenger
+			case "random":
+				int chance=50;
+				if(args.length>=1)
+				{
+					try
+					{
+						chance=Integer.parseInt(args[0]);
+						chance=chance>100?100:chance;
+						chance=chance<0?0:chance;
+					}
+					catch(NumberFormatException e)
+					{}
+				}
+				return Math.random()*100<chance;
+				//end random
 		}
 		throw new FlagFailureException();
 	}

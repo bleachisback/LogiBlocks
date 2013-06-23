@@ -105,6 +105,7 @@ public class LogiBlocksMain extends JavaPlugin
 		registerFlag("exists",flagListener);
 		registerFlag("hasPassenger",flagListener);
 		registerFlag("isPassenger",flagListener);		
+		registerFlag("random",flagListener);
 		
 		log.info(desc.getFullName()+" is enabled");
 	}
