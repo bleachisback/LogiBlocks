@@ -52,6 +52,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.util.Vector;
 
+import plugin.bleachisback.LogiBlocks.FakePlayer;
 import plugin.bleachisback.LogiBlocks.FlagFailureException;
 import plugin.bleachisback.LogiBlocks.LogiBlocksMain;
 
@@ -362,7 +363,7 @@ public class BaseCommandListener implements CommandExecutor
 							server.getScheduler().cancelTask(id);
 						}
 					}, Integer.parseInt(args[2])*Integer.parseInt(args[1]));
-				}				
+				}
 				break;
 				//end repeat
 			case "setflag":
@@ -671,7 +672,7 @@ public class BaseCommandListener implements CommandExecutor
 							if(SniperBrushes.hasBrush(att))
 							{
 								brushName=att;
-							}
+							}							
 							//If not, try to set brush size instead
 							else
 							{
@@ -749,6 +750,7 @@ public class BaseCommandListener implements CommandExecutor
 				//Each sniper is based on the network created by named command blocks
 				//Each "network" will store its own undos
 				Sniper sniper=new Sniper();
+				sniper.setPlayer(new FakePlayer());
 				if(snipers.containsKey(block.getName()))
 				{
 					sniper=snipers.get(block.getName());
@@ -765,6 +767,8 @@ public class BaseCommandListener implements CommandExecutor
 				snipeData.setReplaceId(replaceId);
 				snipeData.setVoxelHeight(voxelHeight);
 				snipeData.setVoxelId(voxelId);
+				
+				((FakePlayer)sniper.getPlayer()).setWorld(location.getWorld());
 								
 				try 
 				{
@@ -789,8 +793,7 @@ public class BaseCommandListener implements CommandExecutor
 							brush.parameters(voxelArgs.toArray(new String[0]), snipeData);
 						}
 						catch(NullPointerException e)
-						{
-						}
+						{}
 					}					
 					
 					Field field=Brush.class.getDeclaredField("blockPositionX");					
