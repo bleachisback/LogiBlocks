@@ -9,7 +9,14 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import net.minecraft.server.v1_5_R3.EntityPlayer;
+import net.minecraft.server.v1_5_R3.Packet39AttachEntity;
+
+import org.bukkit.Art;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.DyeColor;
+import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
@@ -20,12 +27,28 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.v1_5_R3.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Firework;
+import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Ocelot;
+import org.bukkit.entity.Painting;
+import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Slime;
+import org.bukkit.entity.TNTPrimed;
+import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.permissions.Permission;
@@ -502,6 +525,255 @@ public class LogiBlocksMain extends JavaPlugin
 		return flags;
 	}
 	
+	private int currentRainbow=0;
+	
+	@SuppressWarnings("incomplete-switch")
+	public void handleData(Entity ent, String data)
+	{
+		if(data==null||ent==null)
+		{
+			return;
+		}
+		for(String dataPiece:data.split(";"))
+		{
+			if(ent instanceof LivingEntity&&(dataPiece.startsWith("n=")||dataPiece.startsWith("name=")))
+			{
+				((LivingEntity)ent).setCustomName(dataPiece.substring(dataPiece.indexOf("=")+1,dataPiece.length()));
+				continue;				
+			}
+			switch(ent.getType())
+			{
+				case CREEPER:
+					((Creeper)ent).setPowered(dataPiece.equalsIgnoreCase("powered")||dataPiece.equalsIgnoreCase("charged"));
+					break;
+				case ENDERMAN:
+					Material enderMat=null;
+					try
+					{
+						enderMat=Material.getMaterial(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{
+						enderMat=Material.matchMaterial(dataPiece);
+					}
+					if(enderMat==null)
+					{
+						return;
+					}
+					((Enderman)ent).setCarriedMaterial(enderMat.getNewData((byte)0));
+					break;
+				case EXPERIENCE_ORB:
+					try
+					{
+						((ExperienceOrb)ent).setExperience(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{}
+					break;
+				case FIREWORK:
+					Firework firework=(Firework)ent;
+					FireworkMeta meta=firework.getFireworkMeta();
+					if(dataPiece.contains("="))
+					{
+						switch(dataPiece.substring(0,dataPiece.indexOf("=")))
+						{
+							case "p":
+							case "power":
+								try
+								{
+									meta.setPower(Integer.parseInt(dataPiece.substring(dataPiece.indexOf("=")+1, dataPiece.length())));
+								}
+								catch(NumberFormatException e)
+								{}
+								break;
+							case "e":
+							case "effect":
+								String[] effect=dataPiece.substring(dataPiece.indexOf("=")+1, dataPiece.length()).split("\\|");
+								FireworkEffect.Builder builder=FireworkEffect.builder();
+								boolean color=false;
+								for(String effectPiece:effect)
+								{
+									if(effectPiece.equalsIgnoreCase("flicker"))
+									{
+										builder.withFlicker();
+									}
+									else if(effectPiece.equalsIgnoreCase("trail"))
+									{
+										builder.withTrail();
+									}
+									else if(effectPiece.contains("="))
+									{
+										switch(effectPiece.substring(0,effectPiece.indexOf("=")))
+										{
+											case "e":
+											case "effect":
+												try
+												{
+													builder.with(FireworkEffect.Type.valueOf(effectPiece.substring(effectPiece.indexOf("=")+1,effectPiece.length()).toUpperCase()));
+												}
+												catch(IllegalArgumentException _e)
+												{}
+												break;
+											case "c":
+											case "color":
+												try
+												{
+													builder.withColor(Color.fromRGB(Integer.parseInt(effectPiece.substring(effectPiece.indexOf("=")+1,effectPiece.length()), 16)));
+													color=true;
+												}
+												catch(NumberFormatException e)
+												{}
+												break;
+											case "f":
+											case "fade":
+												try
+												{
+													builder.withFade(Color.fromRGB(Integer.parseInt(effectPiece.substring(effectPiece.indexOf("=")+1,effectPiece.length()), 16)));
+												}
+												catch(NumberFormatException e)
+												{}
+												break;
+										}
+									}
+								}
+								if(!color)
+								{
+									builder.withColor(Color.WHITE);
+								}
+								meta.addEffect(builder.build());
+								break;
+						}
+					}
+					firework.setFireworkMeta(meta);
+					break;
+				case ITEM_FRAME:
+					Material frameMat=null;
+					try
+					{
+						frameMat=Material.getMaterial(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{
+						frameMat=Material.matchMaterial(dataPiece);
+					}
+					if(frameMat==null)
+					{
+						return;
+					}
+					((ItemFrame)ent).setItem(new ItemStack(frameMat));
+					break;
+				case MAGMA_CUBE:
+					try
+					{
+						((Slime)ent).setSize(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{}
+					break;
+				case OCELOT:
+					Ocelot.Type ocelotType=null;
+					try
+					{
+						ocelotType=Ocelot.Type.getType(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{
+						try
+						{
+							ocelotType=Ocelot.Type.valueOf(dataPiece.toUpperCase());
+						}
+						catch(IllegalArgumentException _e)
+						{}
+						
+					}
+					if(ocelotType==null)
+					{
+						return;
+					}
+					((Ocelot)ent).setCatType(ocelotType);
+					break;
+				case PAINTING:
+					Art paintType=null;
+					try
+					{
+						paintType=Art.getById(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{
+						paintType=Art.getByName(dataPiece);
+					}
+					if(paintType==null)
+					{
+						return;
+					}
+					((Painting)ent).setArt(paintType);
+					break;
+				case PIG:
+					((Pig)ent).setSaddle(dataPiece.equalsIgnoreCase("saddle")||dataPiece.equalsIgnoreCase("saddled"));
+					break;
+				case PRIMED_TNT:
+					try
+					{
+						((TNTPrimed)ent).setFuseTicks(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{}
+					break;
+				case SHEEP:
+					((Sheep)ent).setSheared((dataPiece.equalsIgnoreCase("sheared")||dataPiece.equalsIgnoreCase("naked"))&&!((Sheep)ent).isSheared());					
+					try
+					{
+						((Sheep)ent).setColor(DyeColor.valueOf(dataPiece.toUpperCase()));
+					}	
+					catch(IllegalArgumentException e)
+					{						
+						if(dataPiece.equalsIgnoreCase("rainbow"))
+						{
+							((Sheep)ent).setColor(DyeColor.values()[currentRainbow]);
+							currentRainbow++;
+							if(currentRainbow>=DyeColor.values().length)
+							{
+								currentRainbow=0;
+							}
+						}
+					}
+					break;
+				case SKELETON:
+					((Skeleton)ent).setSkeletonType(dataPiece.equalsIgnoreCase("wither")?Skeleton.SkeletonType.WITHER:Skeleton.SkeletonType.NORMAL);
+					break;
+				case SLIME:
+					try
+					{
+						((Slime)ent).setSize(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{}
+					break;
+				case VILLAGER:
+					Villager.Profession villagerProfession=null;
+					try
+					{
+						villagerProfession=Villager.Profession.getProfession(Integer.parseInt(dataPiece));
+					}
+					catch(NumberFormatException e)
+					{
+						try
+						{
+							villagerProfession=Villager.Profession.valueOf(dataPiece.toUpperCase());
+						}
+						catch(IllegalArgumentException _e)
+						{}
+					}
+					if(villagerProfession==null)
+					{
+						return;
+					}
+					((Villager)ent).setProfession(villagerProfession);
+					break;
+			}
+		}
+	}
+	
 	public static ItemStack parseItemStack(String itemString)
 	{
 		if(itemString.startsWith("@i[")&&itemString.endsWith("]"))
@@ -822,6 +1094,29 @@ public class LogiBlocksMain extends JavaPlugin
 				return EntityType.IRON_GOLEM;
 			default:
 				return null;
+		}
+	}
+	
+	public void teleport(Entity tper,Location tpLocation)
+	{
+		while(tper.getVehicle()!=null)
+		{
+			tper=tper.getVehicle();
+		}		
+		Entity tpPassenger=tper.getPassenger();
+		tper.eject();
+		tper.teleport(tpLocation);
+		tper.setPassenger(tpPassenger);
+		if(tpPassenger instanceof Player)
+		{
+			final EntityPlayer entPlayer=((CraftPlayer)tpPassenger).getHandle();
+			Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable()
+			{
+				public void run() 
+				{
+					entPlayer.playerConnection.sendPacket(new Packet39AttachEntity(entPlayer,entPlayer.vehicle));
+				}						
+			}, 1);
 		}
 	}
 }
