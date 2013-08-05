@@ -31,12 +31,16 @@ public class FilterCommandListener implements CommandExecutor, Listener
 			{
 				continue;
 			}
+			//For some reason, some commands get caught in a loop where their executor is set to this class twice, meaning it keep getting filtered forever
+			//It shouldn't be happening, as I specifically check for it, but it happens anyway
+			//Users can specifically disable commands and plugins that might have this problem
 			else if(plugin.config.getStringList("disable-filtering.plugins").contains(_plugin.getName()))
 			{
 				continue;
 			}
 			for(String cmdString:_plugin.getDescription().getCommands().keySet())
-			{				
+			{
+				//Commands for plugins that have not been enabled yet will appear as null
 				PluginCommand cmd=Bukkit.getPluginCommand(cmdString);
 				if(cmd==null)
 				{
@@ -75,6 +79,7 @@ public class FilterCommandListener implements CommandExecutor, Listener
 		{
 			return false;
 		}
+		//The server used to crash here with a StackOverflowError, but now the command just won't go through
 		else if(executors.get(cmd)==this)
 		{
 			plugin.log.info("Something went wrong! e1 - "+cmd.getName());

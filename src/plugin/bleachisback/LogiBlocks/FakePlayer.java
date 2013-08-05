@@ -239,7 +239,7 @@ public class FakePlayer implements Player
 	}
 
 	@Override
-	public int getLastDamage() 
+	public double getLastDamage() 
 	{
 		return 0;
 	}
@@ -330,10 +330,6 @@ public class FakePlayer implements Player
 
 	@Override
 	public void setCustomNameVisible(boolean arg0) 
-	{}
-
-	@Override
-	public void setLastDamage(int arg0) 
 	{}
 
 	@Override
@@ -588,35 +584,19 @@ public class FakePlayer implements Player
 	{}
 
 	@Override
-	public void damage(int arg0) 
-	{}
-
-	@Override
-	public void damage(int arg0, Entity arg1) 
-	{}
-
-	@Override
-	public int getHealth() 
+	public double getHealth() 
 	{
 		return 0;
 	}
 
 	@Override
-	public int getMaxHealth() 
+	public double getMaxHealth() 
 	{
 		return 0;
 	}
 
 	@Override
 	public void resetMaxHealth() 
-	{}
-
-	@Override
-	public void setHealth(int arg0) 
-	{}
-
-	@Override
-	public void setMaxHealth(int arg0) 
 	{}
 
 	@Override
@@ -1139,6 +1119,114 @@ public class FakePlayer implements Player
 	@Override
 	@Deprecated
 	public void updateInventory() 
+	{}
+
+	@Override
+	public Entity getLeashHolder() throws IllegalStateException 
+	{
+		return null;
+	}
+
+	@Override
+	public boolean isLeashed() 
+	{
+		return false;
+	}
+
+	@Override
+	public void setLastDamage(double arg0) 
+	{}
+
+	@Override
+	public boolean setLeashHolder(Entity arg0) 
+	{
+		return false;
+	}
+
+	@Override
+	public void damage(double arg0) 
+	{}
+
+	@Override
+	public void damage(double arg0, Entity arg1) 
+	{}
+
+	@Override
+	public void setHealth(double arg0) 
+	{}
+
+	@Override
+	public void setMaxHealth(double arg0) 
+	{}
+
+	@Override
+	public double getHealthScale() 
+	{
+		return 0;
+	}
+
+	@Override
+	public boolean isHealthScaled() 
+	{
+		return false;
+	}
+
+	@Override
+	public void playSound(Location arg0, String arg1, float arg2, float arg3) 
+	{}
+
+	@Override
+	public void setHealthScale(double arg0) throws IllegalArgumentException 
+	{}
+
+	@Override
+	public void setHealthScaled(boolean arg0) 
+	{}
+
+	@Override
+	@Deprecated
+	public int _INVALID_getLastDamage() 
+	{
+		return 0;
+	}
+
+	@Override
+	@Deprecated
+	public void _INVALID_setLastDamage(int arg0) 
+	{}
+
+	@Override
+	@Deprecated
+	public void _INVALID_damage(int arg0) 
+	{}
+
+	@Override
+	@Deprecated
+	public void _INVALID_damage(int arg0, Entity arg1) 
+	{}
+
+	@Override
+	@Deprecated
+	public int _INVALID_getHealth() 
+	{
+		return 0;
+	}
+
+	@Override
+	@Deprecated
+	public int _INVALID_getMaxHealth() 
+	{
+		return 0;
+	}
+
+	@Override
+	@Deprecated
+	public void _INVALID_setHealth(int arg0) 
+	{}
+
+	@Override
+	@Deprecated
+	public void _INVALID_setMaxHealth(int arg0) 
 	{}
 	
 }

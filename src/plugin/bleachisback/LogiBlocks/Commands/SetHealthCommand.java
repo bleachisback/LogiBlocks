@@ -30,7 +30,7 @@ public class SetHealthCommand extends BaseCommand
 			sender.sendMessage(ChatColor.RED+"That's not living!");
 			return true;
 		}
-		int setHp=0;
+		double setHp=0.0;
 		try
 		{
 			switch(args[1].charAt(0))

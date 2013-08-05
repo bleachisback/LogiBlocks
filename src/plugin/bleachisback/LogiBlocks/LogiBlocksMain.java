@@ -7,10 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.logging.Logger;
 
-import net.minecraft.server.v1_5_R3.EntityPlayer;
-import net.minecraft.server.v1_5_R3.Packet39AttachEntity;
+import net.minecraft.server.v1_6_R2.EntityPlayer;
+import net.minecraft.server.v1_6_R2.Packet39AttachEntity;
 
 import org.bukkit.Art;
 import org.bukkit.Bukkit;
@@ -21,13 +22,14 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_5_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_6_R2.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Enderman;
@@ -72,15 +74,20 @@ public class LogiBlocksMain extends JavaPlugin
 	private PluginDescriptionFile desc;
 	private PluginManager pm;
 	
-	protected FileConfiguration flagConfig;
 	protected Configuration config;
 	
+	protected FileConfiguration flagConfig;
 	protected File flagFile;
-	protected HashMap<String, FlagListener> flags= new HashMap<String, FlagListener>();	
+	protected HashMap<String, FlagListener> flags = new HashMap<String, FlagListener>();	
 	
-	private Entity lastRedstone=null;
+	private Entity lastRedstone = null;
 	
 	private LogiFlagListener flagListener;
+	
+	private FileConfiguration listenerConfig;
+	private File listenerFile;
+	@SuppressWarnings("unused")
+	private HashMap<String, Block> listeners = new HashMap<String, Block>();
 			
 	public void onEnable()
 	{
@@ -130,6 +137,11 @@ public class LogiBlocksMain extends JavaPlugin
 		registerFlag("isPassenger",flagListener);		
 		registerFlag("random",flagListener);
 		
+		listenerFile = new File(getDataFolder(), "listeners");		
+		listenerConfig = YamlConfiguration.loadConfiguration(listenerFile);
+		loadListeners();
+		
+		
 		log.info(desc.getFullName()+" is enabled");
 	}
 	
@@ -159,6 +171,25 @@ public class LogiBlocksMain extends JavaPlugin
 		return false;
 	}
 	
+	private void loadListeners()
+	{
+		@SuppressWarnings("unchecked")
+		List<String[]> locationList = (List<String[]>) listenerConfig.getList("");
+		for(String[] locArray : locationList)
+		{
+			try
+			{
+				@SuppressWarnings("unused")
+				Location location = new Location(Bukkit.getWorld(UUID.fromString(locArray[0])), Double.parseDouble(locArray[1]), Double.parseDouble(locArray[2]), Double.parseDouble(locArray[3]));
+			}
+			catch(NumberFormatException e)
+			{
+				continue;
+			}
+		}
+	}
+	
+	//Adds the configurable recipe for command blocks
 	private char[][] getchar={{'a','b','c'},{'d','e','f'},{'g','h','i'}};
 	private void setupRecipe()
 	{
@@ -216,10 +247,11 @@ public class LogiBlocksMain extends JavaPlugin
 		}
 	}
 	
+	//For people switching from a version of LogiBlocks before a certain date, to a newer version
+	//Converts old flag files to new ones
+	//All old flags are now global flags
 	private void convertOldFlags()
-	{
-		//Converts old flag files to new ones
-		//All old flags are now global flags
+	{		
 		for(String name:flagConfig.getKeys(false))
 		{
 			if(!name.equals("global")&&!name.equals("local"))
@@ -238,6 +270,8 @@ public class LogiBlocksMain extends JavaPlugin
 		}
 	}
 	
+	//For people switching from an older plugin version or trying to refresh their config file
+	//This will automatically replace any values that don't exist in the current config file with their default value
 	private void updateConfig()
 	{
 		Map<String,Object> map=config.getDefaults().getValues(true);
@@ -251,8 +285,11 @@ public class LogiBlocksMain extends JavaPlugin
 		saveConfig();
 	}
 	
-	
-	
+	//Searches for specific syntax in commands
+	//Syntax being filtered so far:
+	//&& - Used to run several commands in one line
+	//@e - Similar to @p, but for entities
+	//@lr - Similar to @p and @e, except it returns the last entity/player that activated redstone
 	public boolean filter(String[] args, CommandSender sender, Command command, Location loc)
 	{
 		for(int currentArg=0;currentArg<args.length;currentArg++)
@@ -525,8 +562,11 @@ public class LogiBlocksMain extends JavaPlugin
 		return flags;
 	}
 	
+	//Controls what color the next sheep spawned with the "rainbow" color argument will be
 	private int currentRainbow=0;
 	
+	//Allows plugins to change an entity's data, based on user input
+	//Used by the spawn and setdata sub-commands
 	@SuppressWarnings("incomplete-switch")
 	public void handleData(Entity ent, String data)
 	{
@@ -774,6 +814,8 @@ public class LogiBlocksMain extends JavaPlugin
 		}
 	}
 	
+	//Allows plugins to get a Bukkit ItemStack from a user through text
+	//The format is @i[arg1=arg1,arg2=arg2,...]
 	public static ItemStack parseItemStack(String itemString)
 	{
 		if(itemString.startsWith("@i[")&&itemString.endsWith("]"))
@@ -873,6 +915,9 @@ public class LogiBlocksMain extends JavaPlugin
 		return null;		
 	}
 	
+	//Allows plugins to get a Bukkit Entity from a user through text
+	//This is after the command has already been filtered
+	//The format is @e[entityId]
 	public static Entity parseEntity(String entity, World world)
 	{		
 		if(entity.startsWith("@e[")&&entity.endsWith("]"))
@@ -897,6 +942,8 @@ public class LogiBlocksMain extends JavaPlugin
 		return Bukkit.getPlayer(entity);
 	}
 	
+	//Allows plugins to get a Bukkit Location from a user through text
+	//The format is @l[arg1=arg1,arg2=arg2,...]
 	public static Location parseLocation(String locString, Location def)
 	{
 		if(locString.startsWith("@l[")&&locString.endsWith("]"))
@@ -1052,6 +1099,7 @@ public class LogiBlocksMain extends JavaPlugin
 		return def;		
 	}
 	
+	//Alows plugins to register their own flags for use in certain commands, such as logicif and the setflag sub-command
 	public void registerFlag(String flag, FlagListener listener)
 	{
 		if(listener==null)
@@ -1061,6 +1109,8 @@ public class LogiBlocksMain extends JavaPlugin
 		flags.put(flag.toLowerCase().replace(" ", "_"), listener);
 	}
 	
+	//Many of the names listed for entities in the EntityType Enum are odd, and not what an average person would remember them by
+	//This helps to make them more user-friendly
 	public static EntityType entFromAlias(String alias)
 	{
 		switch(alias.toLowerCase())
@@ -1097,6 +1147,7 @@ public class LogiBlocksMain extends JavaPlugin
 		}
 	}
 	
+	//A special teleport function - will not only teleport the specific entity, but also anything that it is riding, and anything that is riding it
 	public void teleport(Entity tper,Location tpLocation)
 	{
 		while(tper.getVehicle()!=null)
@@ -1114,7 +1165,7 @@ public class LogiBlocksMain extends JavaPlugin
 			{
 				public void run() 
 				{
-					entPlayer.playerConnection.sendPacket(new Packet39AttachEntity(entPlayer,entPlayer.vehicle));
+					entPlayer.playerConnection.sendPacket(new Packet39AttachEntity(0,entPlayer,entPlayer.vehicle));
 				}						
 			}, 1);
 		}

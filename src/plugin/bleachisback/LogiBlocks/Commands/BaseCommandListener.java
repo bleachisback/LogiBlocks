@@ -46,16 +46,22 @@ public class BaseCommandListener implements CommandExecutor
 		if(Bukkit.getPluginManager().getPlugin("VoxelSniper")==null)
 		{
 			BaseCommands.VOXELSNIPER.setEnabled(false);
-		}		
+		}
+		else if(BaseCommands.VOXELSNIPER.isEnabled())
+		{
+			plugin.getLogger().info("Voxelsniper detected - adding support");
+		}
 	}
 
 	public boolean onCommand(final CommandSender sender, Command cmd, String label, String[] args)
 	{
+		//Anything that isn't a player or CommandBlock can't use these commands, as they rely on locations
 		if(!(sender instanceof BlockCommandSender)&&!(sender instanceof Player))
 		{
 			sender.sendMessage(ChatColor.DARK_RED+"That command can only be used in-game!");
 			return true;
 		}
+		//Every command has a sub-command
 		if(args.length<1)
 		{
 			return false;
@@ -82,6 +88,7 @@ public class BaseCommandListener implements CommandExecutor
 			sender.sendMessage(ChatColor.DARK_RED+"That sub-command doesn't exist!");
 			return false;
 		}
+		//Each command has a minimum number of arguments required for the command to work
 		if(args.length <= command.getMinArgs())
 		{
 			sender.sendMessage(ChatColor.DARK_RED+"That's now how you use that!");
