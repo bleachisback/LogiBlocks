@@ -137,9 +137,9 @@ public class LogiBlocksMain extends JavaPlugin
 		registerFlag("isPassenger",flagListener);		
 		registerFlag("random",flagListener);
 		
-		listenerFile = new File(getDataFolder(), "listeners");		
-		listenerConfig = YamlConfiguration.loadConfiguration(listenerFile);
-		loadListeners();
+		//listenerFile = new File(getDataFolder(), "listeners");		
+		//listenerConfig = YamlConfiguration.loadConfiguration(listenerFile);
+		//loadListeners();
 		
 		
 		log.info(desc.getFullName()+" is enabled");
