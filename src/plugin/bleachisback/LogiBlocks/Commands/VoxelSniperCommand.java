@@ -245,7 +245,8 @@ public class VoxelSniperCommand extends BaseCommand
 				{}
 			}					
 			
-			Field field=Brush.class.getDeclaredField("blockPositionX");					
+			Field field;
+			/*field=Brush.class.getDeclaredField("blockPositionX");					
 			field.setAccessible(true);
 			field.set(brush, snipeLocation.getBlockX());
 
@@ -259,7 +260,7 @@ public class VoxelSniperCommand extends BaseCommand
 			
 			field=Brush.class.getDeclaredField("world");					
 			field.setAccessible(true);
-			field.set(brush, snipeLocation.getWorld());
+			field.set(brush, snipeLocation.getWorld());*/
 			
 			field=Brush.class.getDeclaredField("targetBlock");					
 			field.setAccessible(true);
