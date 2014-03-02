@@ -14,9 +14,9 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 
+import com.thevoxelbox.voxelsniper.Brushes;
 import com.thevoxelbox.voxelsniper.SnipeData;
 import com.thevoxelbox.voxelsniper.Sniper;
-import com.thevoxelbox.voxelsniper.SniperBrushes;
 import com.thevoxelbox.voxelsniper.Undo;
 import com.thevoxelbox.voxelsniper.brush.Brush;
 import com.thevoxelbox.voxelsniper.brush.perform.PerformBrush;
@@ -118,7 +118,7 @@ public class VoxelSniperCommand extends BaseCommand
 			{
 				case "b":
 					//Check if brush exists
-					if(SniperBrushes.hasBrush(att))
+					if(Brushes.getNewSniperBrushInstance(att) != null)
 					{
 						brushName=att;
 					}							
@@ -222,7 +222,7 @@ public class VoxelSniperCommand extends BaseCommand
 		try 
 		{
 			//gets a VoxelSniper brush instance, and sets the variables to be able to run
-			Brush brush=(Brush) SniperBrushes.getBrushInstance(brushName);
+			Brush brush=(Brush) Brushes.getNewSniperBrushInstance(brushName);
 			
 			//Check if brush is on blacklist
 			List<String> blacklist=plugin.getConfig().getStringList("voxelsniper-blacklist");

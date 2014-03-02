@@ -10,8 +10,8 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-import net.minecraft.server.v1_6_R2.EntityPlayer;
-import net.minecraft.server.v1_6_R2.Packet39AttachEntity;
+import net.minecraft.server.v1_7_R1.EntityPlayer;
+import net.minecraft.server.v1_7_R1.PacketPlayOutAttachEntity;
 
 import org.bukkit.Art;
 import org.bukkit.Bukkit;
@@ -29,7 +29,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_6_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Enderman;
@@ -1165,7 +1165,7 @@ public class LogiBlocksMain extends JavaPlugin
 			{
 				public void run() 
 				{
-					entPlayer.playerConnection.sendPacket(new Packet39AttachEntity(0,entPlayer,entPlayer.vehicle));
+					entPlayer.playerConnection.sendPacket(new PacketPlayOutAttachEntity(0,entPlayer,entPlayer.vehicle));
 				}						
 			}, 1);
 		}
