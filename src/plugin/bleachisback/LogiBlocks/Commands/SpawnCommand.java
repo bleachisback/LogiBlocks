@@ -23,11 +23,11 @@ public class SpawnCommand extends BaseCommand
 	{
 		Location spawnLocation=location.add(0, 1, 0);
 		int amount = 1;
-		if(args.length>=3)
+		if(args.length>=2)
 		{
 			spawnLocation = LogiBlocksMain.parseLocation(args[1], spawnLocation);
 		}
-		if(args.length>=4)
+		if(args.length>=3)
 		{
 			try
 			{
