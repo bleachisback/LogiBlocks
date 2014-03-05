@@ -91,7 +91,7 @@ public class BaseCommandListener implements CommandExecutor
 		//Each command has a minimum number of arguments required for the command to work
 		if(args.length <= command.getMinArgs())
 		{
-			sender.sendMessage(ChatColor.DARK_RED+"That's now how you use that!");
+			sender.sendMessage(ChatColor.DARK_RED+"That's not how you use that!");
 			return false;
 		}
 		return command.execute(sender, Arrays.copyOfRange(args, 1, args.length), location);
