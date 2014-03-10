@@ -44,6 +44,7 @@ public class SpawnCommand extends BaseCommand
 		return true;
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void spawn(String stackString,Location spawnLocation)
 	{
 		ArrayList<String> stackArray=new ArrayList<String>(Arrays.asList(stackString.split(",")));		

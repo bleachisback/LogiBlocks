@@ -55,6 +55,8 @@ public class BaseCommandListener implements CommandExecutor
 
 	public boolean onCommand(final CommandSender sender, Command cmd, String label, String[] args)
 	{
+		System.out.println("Command executed: " + args[0]);
+		
 		//Anything that isn't a player or CommandBlock can't use these commands, as they rely on locations
 		if(!(sender instanceof BlockCommandSender)&&!(sender instanceof Player))
 		{

@@ -2,6 +2,8 @@ package plugin.bleachisback.LogiBlocks;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -10,11 +12,14 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Logger;
 
+import net.minecraft.server.v1_7_R1.CommandBlockListenerAbstract;
 import net.minecraft.server.v1_7_R1.EntityPlayer;
 import net.minecraft.server.v1_7_R1.PacketPlayOutAttachEntity;
+import net.minecraft.server.v1_7_R1.TileEntityCommand;
 
 import org.bukkit.Art;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.bukkit.FireworkEffect;
@@ -24,11 +29,13 @@ import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.craftbukkit.v1_7_R1.block.CraftCommandBlock;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Creeper;
@@ -67,8 +74,11 @@ import plugin.bleachisback.LogiBlocks.Listeners.LogiBlocksInteractListener;
 import plugin.bleachisback.LogiBlocks.Listeners.LogiBlocksRedstoneListener;
 import plugin.bleachisback.LogiBlocks.Listeners.LogiFlagListener;
 
+@SuppressWarnings("deprecation")
 public class LogiBlocksMain extends JavaPlugin
 {
+	public static final String LISTENER_CONFIG_PATH = "listeners";
+	
 	protected Logger log;
 	private Server server;
 	private PluginDescriptionFile desc;
@@ -86,8 +96,8 @@ public class LogiBlocksMain extends JavaPlugin
 	
 	private FileConfiguration listenerConfig;
 	private File listenerFile;
-	@SuppressWarnings("unused")
-	private HashMap<String, Block> listeners = new HashMap<String, Block>();
+
+	public HashMap<String, ArrayList<Sign>> listeners = new HashMap<String, ArrayList<Sign>>();
 			
 	public void onEnable()
 	{
@@ -137,9 +147,9 @@ public class LogiBlocksMain extends JavaPlugin
 		registerFlag("isPassenger",flagListener);		
 		registerFlag("random",flagListener);
 		
-		//listenerFile = new File(getDataFolder(), "listeners");		
-		//listenerConfig = YamlConfiguration.loadConfiguration(listenerFile);
-		//loadListeners();
+		listenerFile = new File(getDataFolder(), "listeners");		
+		listenerConfig = YamlConfiguration.loadConfiguration(listenerFile);
+		loadListeners();
 		
 		
 		log.info(desc.getFullName()+" is enabled");
@@ -153,6 +163,28 @@ public class LogiBlocksMain extends JavaPlugin
 	private void trace(String string)
 	{
 		log.info(string);
+	}
+	
+	public void addListener(String listenerName, Sign sign) {
+		listenerName = listenerName.toLowerCase();
+		
+		ArrayList<Sign> signList = new ArrayList<Sign>();
+		if(listeners.containsKey(listenerName)) signList = listeners.get(listenerName);
+		signList.add(sign);
+		listeners.put(listenerName, signList);
+		
+		saveListeners();
+	}
+	
+	public boolean checkListener(Block listener) {
+		if(listener.getType() != Material.WALL_SIGN) return false;
+		
+		Sign sign = (Sign) listener.getState();
+		if(!sign.getLine(0).equals(ChatColor.GREEN + "[Listener]")) return false;
+		
+		if(listener.getRelative(((org.bukkit.material.Sign) sign.getData()).getAttachedFace()).getType() != Material.COMMAND) return false;
+		
+		return true;
 	}
 	
 	@Override
@@ -171,19 +203,21 @@ public class LogiBlocksMain extends JavaPlugin
 		return false;
 	}
 	
-	private void loadListeners()
-	{
+	private void loadListeners() {
 		@SuppressWarnings("unchecked")
-		List<String[]> locationList = (List<String[]>) listenerConfig.getList("");
-		for(String[] locArray : locationList)
-		{
-			try
-			{
-				@SuppressWarnings("unused")
+		List<List<String>> locationList = (List<List<String>>) listenerConfig.getList(LISTENER_CONFIG_PATH);
+		if(locationList == null) return;
+		
+		for(List<String> locList: locationList) {
+			String[] locArray = locList.toArray(new String[0]);
+			try {
 				Location location = new Location(Bukkit.getWorld(UUID.fromString(locArray[0])), Double.parseDouble(locArray[1]), Double.parseDouble(locArray[2]), Double.parseDouble(locArray[3]));
-			}
-			catch(NumberFormatException e)
-			{
+				
+				if(!checkListener(location.getBlock())) continue;
+				
+				Sign sign = (Sign) location.getBlock().getState();
+				addListener(sign.getLine(1), sign);
+			} catch(NumberFormatException e) {
 				continue;
 			}
 		}
@@ -1147,6 +1181,26 @@ public class LogiBlocksMain extends JavaPlugin
 		}
 	}
 	
+	public void saveListeners() {
+		List<String[]> locationList = new ArrayList<String[]>();
+		for(ArrayList<Sign> signList : listeners.values()) {
+			for(Sign sign : signList) {
+				Location location = sign.getLocation();
+				String[] locationArray = {"" + location.getWorld().getUID().toString(), "" + location.getBlockX(), "" + location.getBlockY(), "" + location.getBlockZ()};
+				
+				if(!locationList.contains(locationArray)) {
+					locationList.add(locationArray);
+				}							
+			}			
+		}
+		listenerConfig.set(LISTENER_CONFIG_PATH, locationList);
+		try {
+			listenerConfig.save(listenerFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	//A special teleport function - will not only teleport the specific entity, but also anything that it is riding, and anything that is riding it
 	public void teleport(Entity tper,Location tpLocation)
 	{
@@ -1169,5 +1223,47 @@ public class LogiBlocksMain extends JavaPlugin
 				}						
 			}, 1);
 		}
+	}
+	
+	public void triggerListener(String listener, String arg) {
+		if(!listeners.containsKey(listener)) return;		
+		
+		@SuppressWarnings("unchecked")
+		ArrayList<Sign> signList = (ArrayList<Sign>) listeners.get(listener).clone();
+		for(Sign sign : listeners.get(listener)) {
+			if(!checkListener(sign.getBlock())) {
+				signList.remove(sign);
+				continue;
+			}
+			
+			Block block = sign.getBlock().getRelative(((org.bukkit.material.Sign) sign.getData()).getAttachedFace());
+						
+			Field field;
+			try {
+				field = CraftCommandBlock.class.getDeclaredField("commandBlock");
+				field.setAccessible(true);
+				
+				TileEntityCommand tileCommand = (TileEntityCommand) field.get(((CraftCommandBlock) block.getState()));
+				CommandBlockListenerAbstract commandBlock = tileCommand.a();
+				
+				String command = commandBlock.e;				
+				if(arg != null) {					
+					commandBlock.e = command.replace("?arg?", arg);
+				}
+				
+				//Commented out because doesn't work. GG no re, Mojang
+				//commandBlock.getWorld().players.add("blah");
+				
+				commandBlock.a(tileCommand.getWorld());
+				commandBlock.e = command;
+				
+				//tileCommand.getWorld().players.remove("blah");
+			} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
+				e1.printStackTrace();
+				continue;
+			}			
+		}
+		listeners.put(listener, signList);
+		
 	}
 }

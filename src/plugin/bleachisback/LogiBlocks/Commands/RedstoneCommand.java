@@ -21,6 +21,7 @@ public class RedstoneCommand extends BaseCommand
 		super(plugin);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public boolean execute(CommandSender sender, String[] args, Location location) 
 	{		
