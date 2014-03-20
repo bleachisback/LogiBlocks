@@ -2,6 +2,7 @@ package plugin.bleachisback.LogiBlocks.Listeners;
 
 import java.util.WeakHashMap;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -64,8 +65,7 @@ public class LogiBlocksInteractListener implements Listener {
 				e.getPlayer().sendMessage(ChatColor.RED+"Command editing cancelled");
 				awaitingPlayers.remove(e.getPlayer());
 				return;
-			}
-			else if(awaitingPlayers.get(e.getPlayer()).getType() == Material.COMMAND) {
+			} else if(awaitingPlayers.get(e.getPlayer()).getType() == Material.COMMAND) {
 				for(String perm : plugin.getConfig().getConfigurationSection("permissions").getKeys(false)) {
 					if(e.getPlayer().hasPermission("c.permission." + perm)) {
 						loop: for(String command : plugin.getConfig().getStringList("permissions." + perm)) {
@@ -84,9 +84,7 @@ public class LogiBlocksInteractListener implements Listener {
 					}
 				}
 				e.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission to do that!");
-			}
-			else
-			{
+			} else {
 				e.getPlayer().sendMessage(ChatColor.RED + "The command block doesn't exist anymore!");
 			}
 			awaitingPlayers.remove(e.getPlayer());
@@ -101,6 +99,11 @@ public class LogiBlocksInteractListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerJoin(PlayerJoinEvent e) {
-		plugin.triggerListener("login", e.getPlayer().getDisplayName());
+		final String name = e.getPlayer().getDisplayName();
+		Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+			public void run() {
+				plugin.triggerListener("login", name);
+			}
+		}, 1);		
 	}
 }
