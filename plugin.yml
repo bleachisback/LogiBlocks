@@ -17,6 +17,9 @@ commands:
     phantom:
         permission: c.hidden.phantom
 permissions:
+    c.break:
+        default: op
+        description: Allows user to destroy command blocks
     c.craft:
         default: op
         description: Allows user to craft command blocks

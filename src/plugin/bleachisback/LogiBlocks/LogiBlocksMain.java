@@ -66,6 +66,13 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+
 import plugin.bleachisback.LogiBlocks.Commands.BaseCommandListener;
 import plugin.bleachisback.LogiBlocks.Commands.ForCommandListener;
 import plugin.bleachisback.LogiBlocks.Commands.LogiCommandListener;
@@ -98,6 +105,8 @@ public class LogiBlocksMain extends JavaPlugin
 	private File listenerFile;
 
 	public HashMap<String, ArrayList<Sign>> listeners = new HashMap<String, ArrayList<Sign>>();
+	
+	public boolean protocolLib = false;
 			
 	public void onEnable()
 	{
@@ -127,7 +136,24 @@ public class LogiBlocksMain extends JavaPlugin
 		}
 		if(config.getBoolean("allow-command-insertion",true))
 		{
-			pm.registerEvents(new LogiBlocksInteractListener(this), this);
+			if(/*Bukkit.getPluginManager().getPlugin("VoxelSniper") != null*/true) {
+				pm.registerEvents(new LogiBlocksInteractListener(this), this);
+			} else {
+				ProtocolManager pm = ProtocolLibrary.getProtocolManager();
+				pm.addPacketListener(new PacketAdapter(this, new PacketType[] {PacketType.Play.Client.CUSTOM_PAYLOAD}) {
+					public void onPacketReceiving(PacketEvent e) {
+						PacketContainer packet = e.getPacket();
+						if(!((packet.getStrings().size() >= 1) && (((String)packet.getStrings().read(0)).equals("MC|AdvCdm")))) return;
+						if(!e.getPlayer().hasPermission("c.edit")) {
+							e.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission for that!");
+							return;
+						}
+						e.setCancelled(true);						
+					}
+
+				});
+			}			
+			
 			setupPermissions();
 		}
 		if(config.getBoolean("listen-for-redstone",true))
@@ -326,6 +352,11 @@ public class LogiBlocksMain extends JavaPlugin
 	//@lr - Similar to @p and @e, except it returns the last entity/player that activated redstone
 	public boolean filter(String[] args, CommandSender sender, Command command, Location loc)
 	{
+		boolean shouldReturn = true;
+		String cmd = command.getName();
+		for(String arg : args) {
+			cmd += " " + arg;
+		}
 		for(int currentArg=0;currentArg<args.length;currentArg++)
 		{
 			String string=args[currentArg];
@@ -370,72 +401,68 @@ public class LogiBlocksMain extends JavaPlugin
 						
 						if(string.contains("[")&&string.contains("]"))
 						{
-							if(!string.contains("="))
+							if(string.contains("="))
 							{
-								return true;
-							}
-							for(String args1:string.substring(string.indexOf("[")+1, string.indexOf("]")).split(","))
-							{
-								if(args1.length()<3||!args1.contains("="))
+								for(String args1:string.substring(string.indexOf("[")+1, string.indexOf("]")).split(","))
 								{
-									continue;
-								}
-								if(args1.length()<=args1.indexOf("="))
-								{
-									continue;
-								}
-								try
-								{
-									switch(args1.substring(0,args1.indexOf("=")))
+									if(args1.length()<3||!args1.contains("="))
 									{
-										case "t":
-										type=EntityType.fromName(args1.substring(2,args1.length()));
-										if(type==null)
-										{
-											type=entFromAlias(args1.substring(2,args1.length()));
-										}
-										break;
-										case "x":
-											x=Double.parseDouble(args1.substring(2,args1.length()));
-											break;
-										case "y":
-											y=Double.parseDouble(args1.substring(2,args1.length()));
-											break;
-										case "z":
-											z=Double.parseDouble(args1.substring(2,args1.length()));
-											break;
-										case "loc":
-											String[] locArray=args1.substring(2,args1.length()).split("\\|");
-											switch(locArray.length)
-											{
-											default:
-											case 3:
-												z=Double.parseDouble(locArray[2]);
-											case 2:
-												y=Double.parseDouble(locArray[1]);
-											case 1:
-												x=Double.parseDouble(locArray[0]);
-												break;
-											case 0:
-												break;
-											}
-											break;
-										case "r":
-											r=Integer.parseInt(args1.substring(2,args1.length()));
-											break;
-										case "rm":
-											rm=Integer.parseInt(args1.substring(3,args1.length()));
-											break;
-										case "c":
-											c=Integer.parseInt(args1.substring(2,args1.length()));
-											break;
-										case "rand":
-											rand=Boolean.parseBoolean(args1.substring(5,args1.length()));
-											break;
+										continue;
 									}
+									if(args1.length()<=args1.indexOf("="))
+									{
+										continue;
+									}
+									try
+									{
+										switch(args1.substring(0,args1.indexOf("=")))
+										{
+											case "t":
+												type=EntityType.fromName(args1.substring(2,args1.length()));
+												if(type==null)
+												{
+													type=entFromAlias(args1.substring(2,args1.length()));
+												}
+												break;
+											case "x":
+												x=Double.parseDouble(args1.substring(2,args1.length()));
+												break;
+											case "y":
+												y=Double.parseDouble(args1.substring(2,args1.length()));
+												break;
+											case "z":
+												z=Double.parseDouble(args1.substring(2,args1.length()));
+												break;
+											case "loc":
+												String[] locArray=args1.substring(2,args1.length()).split("\\|");
+												switch(locArray.length) {
+													default:
+													case 3:
+														z = Double.parseDouble(locArray[2]);
+													case 2:
+														y = Double.parseDouble(locArray[1]);
+													case 1:
+														x = Double.parseDouble(locArray[0]);
+														break;
+													case 0:
+														break;
+												}
+												break;
+											case "r":
+												r = Integer.parseInt(args1.substring(2, args1.length()));
+												break;
+											case "rm":
+												rm = Integer.parseInt(args1.substring(3, args1.length()));
+												break;
+											case "c":
+												c = Integer.parseInt(args1.substring(2, args1.length()));
+												break;
+											case "rand":
+												rand = Boolean.parseBoolean(args1.substring(5, args1.length()));
+												break;
+										}
+									} catch(NumberFormatException e) {}
 								}
-								catch(NumberFormatException e)
-								{}
 							}
 						}
 
@@ -463,47 +490,38 @@ public class LogiBlocksMain extends JavaPlugin
 								}
 							}
 						}
-						if(nearbyEntities.size()==0)
-						{
-							return false;
+						if(nearbyEntities.size() == 0) {
+							shouldReturn = false;
+							continue;
+						}						
+						if(c < 1) {
+							c = nearbyEntities.size();
 						}
 						
-						if(c<1)
-						{
-							c=nearbyEntities.size();
-						}
-						
-						Entity[] entities=new Entity[c];
+						Entity[] entities = new Entity[c];
 
-						if(rand)
-						{
-							for(int i=0;i<c;i++)
-							{
-								Entity entity=nearbyEntities.get(new Random().nextInt(nearbyEntities.size()));
-								entities[i]=entity;
+						if(rand) {
+							for(int i = 0; i < c; i++) {
+								Entity entity = nearbyEntities.get(new Random().nextInt(nearbyEntities.size()));
+								entities[i] = entity;
 								nearbyEntities.remove(entity);
 							}
-						}
-						else
-						{
-							for(int i=0;i<c;i++)
-							{
-								double distance=nearbyEntities.get(0).getLocation().distance(loc);
-								Entity entity=nearbyEntities.get(0);
-								for(Entity e:nearbyEntities)
-								{
-									if(loc.distance(e.getLocation())<distance)
-									{
-										distance=loc.distance(e.getLocation());
-										entity=e;
+						} else {
+							for(int i = 0; i < c; i++) {
+								double distance = nearbyEntities.get(0).getLocation().distance(loc);
+								Entity entity = nearbyEntities.get(0);
+								for(Entity e : nearbyEntities) {
+									if(loc.distance(e.getLocation()) < distance) {
+										distance = loc.distance(e.getLocation());
+										entity = e;
 									}
 								}
-								entities[i]=entity;
+								entities[i] = entity;
 								nearbyEntities.remove(entity);
 							}
 						}
-						String entid="";
-						if(c==1)
+						String entid = "";
+						if(c == 1)
 						{
 							if(entities[0] instanceof Player)
 							{
@@ -546,29 +564,25 @@ public class LogiBlocksMain extends JavaPlugin
 								newArgs[currentArg]=newArg;								
 								command.execute(sender, command.getLabel(), newArgs);								
 							}
-							return false;
+							shouldReturn = false;
 						}
-						return true;
+						break;
 						//End @e
 					case "lr":
-						if(lastRedstone==null)
-						{
-							return false;
-						}
-						else if(lastRedstone instanceof Player)
-						{
-							args[currentArg]=((Player)lastRedstone).getName();
-						}
-						else
-						{
-							args[currentArg]="@e["+lastRedstone.getEntityId()+"]";
+						if(lastRedstone == null) {
+							shouldReturn = false;
+							continue;
+						} else if(lastRedstone instanceof Player) {
+							args[currentArg] = ((Player)lastRedstone).getName();
+						} else {
+							args[currentArg] = "@e[" + lastRedstone.getEntityId() + "]";
 						}						
-						return true;
-						//end @r
+						break;
+						//end @lr
 				}
 			}
 		}
-		return true;
+		return shouldReturn;
 	}
 	
 	public void setLastRedstone(Entity ent)
