@@ -14,8 +14,10 @@ import java.util.logging.Logger;
 
 import net.minecraft.server.v1_7_R1.CommandBlockListenerAbstract;
 import net.minecraft.server.v1_7_R1.EntityPlayer;
+import net.minecraft.server.v1_7_R1.PacketDataSerializer;
 import net.minecraft.server.v1_7_R1.PacketPlayOutAttachEntity;
 import net.minecraft.server.v1_7_R1.TileEntityCommand;
+import net.minecraft.util.io.netty.buffer.Unpooled;
 
 import org.bukkit.Art;
 import org.bukkit.Bukkit;
@@ -29,6 +31,7 @@ import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.CommandBlock;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -55,6 +58,7 @@ import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.Villager;
+import org.bukkit.entity.minecart.CommandMinecart;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -136,23 +140,65 @@ public class LogiBlocksMain extends JavaPlugin
 		}
 		if(config.getBoolean("allow-command-insertion",true))
 		{
-			if(/*Bukkit.getPluginManager().getPlugin("VoxelSniper") != null*/true) {
+			if(Bukkit.getPluginManager().getPlugin("ProtocolLib") == null) {
 				pm.registerEvents(new LogiBlocksInteractListener(this), this);
 			} else {
+				trace("ProtocolLib detected - adding support");
+				
+				//Allows normal players with permissions to use command blocks with PtocolLib
 				ProtocolManager pm = ProtocolLibrary.getProtocolManager();
 				pm.addPacketListener(new PacketAdapter(this, new PacketType[] {PacketType.Play.Client.CUSTOM_PAYLOAD}) {
 					public void onPacketReceiving(PacketEvent e) {
-						PacketContainer packet = e.getPacket();
-						if(!((packet.getStrings().size() >= 1) && (((String)packet.getStrings().read(0)).equals("MC|AdvCdm")))) return;
-						if(!e.getPlayer().hasPermission("c.edit")) {
-							e.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission for that!");
-							return;
+						try {
+							PacketContainer packet = e.getPacket();
+							//Determine type of packet
+							if(!((packet.getStrings().size() >= 1) && (((String)packet.getStrings().read(0)).equals("MC|AdvCdm")))) return;
+							//permission check
+							if(!e.getPlayer().hasPermission("c.edit")) {
+								e.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission for that!");
+								return;
+							}
+							//Overwrite vanilla minecraft handling
+							e.setCancelled(true);
+							//PackDataSerializer used to decipher data in packet
+							PacketDataSerializer packetSerializer = new PacketDataSerializer(Unpooled.wrappedBuffer(packet.getByteArrays().read(0)));
+							//First byte is 0 or 1. 0 is CommandBlock, 1 is CommandMinecart.
+							if(packetSerializer.readByte() == 0) {
+								//In case of CommandBlock, next three ints are x/y/z of the location of the CommandBlock
+								Block block = new Location(e.getPlayer().getWorld(), packetSerializer.readInt(), packetSerializer.readInt(), packetSerializer.readInt()).getBlock();
+								if(block.getType() != Material.COMMAND) {
+									e.getPlayer().sendMessage(ChatColor.DARK_RED + "Couldn't set command block at that location!");
+									return;
+								}
+								//All bytes afterwards are the command
+								String cmd = packetSerializer.c(packetSerializer.readableBytes());
+								CommandBlock cmdBlock = (CommandBlock) block.getState();
+								cmdBlock.setCommand(cmd);
+								cmdBlock.update(true);
+								
+								e.getPlayer().sendMessage(ChatColor.GREEN + "Command set: " + ChatColor.RESET + cmd);
+							} else {								
+								//In case of CommandMinecart, next int is the id of the entity
+								int entId = packetSerializer.readInt();
+								//Call a list of all CommandMinecarts in the world to check agaisnt their ids
+								for(CommandMinecart cmdMinecart : e.getPlayer().getWorld().getEntitiesByClass(CommandMinecart.class)) {
+									if(cmdMinecart.getEntityId() == entId) {
+										String cmd = packetSerializer.c(packetSerializer.readableBytes());
+										cmdMinecart.setCommand(cmd);
+										e.getPlayer().sendMessage(ChatColor.GREEN + "Command set: " + ChatColor.RESET + cmd);
+										return;
+									}
+								}
+								e.getPlayer().sendMessage(ChatColor.DARK_RED + "That CommandMinecart couldn't be found!");
+							}
+						} catch (Exception e1) {
+							e.getPlayer().sendMessage("Couldn't set command block! e2");
+							LogiBlocksMain.this.trace("Something went wrong! e2");
 						}
-						e.setCancelled(true);						
 					}
 
 				});
-			}			
+			}
 			
 			setupPermissions();
 		}
@@ -353,10 +399,6 @@ public class LogiBlocksMain extends JavaPlugin
 	public boolean filter(String[] args, CommandSender sender, Command command, Location loc)
 	{
 		boolean shouldReturn = true;
-		String cmd = command.getName();
-		for(String arg : args) {
-			cmd += " " + arg;
-		}
 		for(int currentArg=0;currentArg<args.length;currentArg++)
 		{
 			String string=args[currentArg];
