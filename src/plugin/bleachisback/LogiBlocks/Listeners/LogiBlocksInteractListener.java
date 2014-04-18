@@ -2,7 +2,6 @@ package plugin.bleachisback.LogiBlocks.Listeners;
 
 import java.util.WeakHashMap;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -17,7 +16,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 
 import plugin.bleachisback.LogiBlocks.LogiBlocksMain;
 
@@ -80,20 +78,5 @@ public class LogiBlocksInteractListener implements Listener {
 			awaitingPlayers.remove(e.getPlayer());
 			return;
 		}		
-	}
-	
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onPlayerChatFinal(AsyncPlayerChatEvent e) {
-		plugin.triggerListener("chat", e.getPlayer().getDisplayName());
-	}
-	
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onPlayerJoin(PlayerJoinEvent e) {
-		final String name = e.getPlayer().getDisplayName();
-		Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
-			public void run() {
-				plugin.triggerListener("login", name);
-			}
-		}, 1);		
 	}
 }
