@@ -172,6 +172,11 @@ public class LogiBlocksMain extends JavaPlugin
 								}
 								//All bytes afterwards are the command
 								String cmd = packetSerializer.c(packetSerializer.readableBytes());
+								//Check if player has permission for the command
+								if(!LogiBlocksMain.this.commandAllowed(e.getPlayer(), cmd)) {
+									e.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission to do that!");
+									return;
+								}
 								CommandBlock cmdBlock = (CommandBlock) block.getState();
 								cmdBlock.setCommand(cmd);
 								cmdBlock.update(true);
@@ -183,7 +188,13 @@ public class LogiBlocksMain extends JavaPlugin
 								//Call a list of all CommandMinecarts in the world to check agaisnt their ids
 								for(CommandMinecart cmdMinecart : e.getPlayer().getWorld().getEntitiesByClass(CommandMinecart.class)) {
 									if(cmdMinecart.getEntityId() == entId) {
+										//All bytes afterwards are the command
 										String cmd = packetSerializer.c(packetSerializer.readableBytes());
+										//Check if player has permission for the command
+										if(!LogiBlocksMain.this.commandAllowed(e.getPlayer(), cmd)) {
+											e.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission to do that!");
+											return;
+										}
 										cmdMinecart.setCommand(cmd);
 										e.getPlayer().sendMessage(ChatColor.GREEN + "Command set: " + ChatColor.RESET + cmd);
 										return;
@@ -1320,6 +1331,24 @@ public class LogiBlocksMain extends JavaPlugin
 			}			
 		}
 		listeners.put(listener, signList);
+	}
+	
+	public boolean commandAllowed(Player player, String cmd) {
+		if(player.hasPermission("c.bypass-whitelist")) return true;
 		
+		for(String perm : getConfig().getConfigurationSection("permissions").getKeys(false)) {
+			if(player.hasPermission("c.permission." + perm)) {
+				loop: for(String command : getConfig().getStringList("permissions." + perm)) {
+					command = command.replace("/", "");
+					if(cmd.length() > command.length()) {
+						for(int i = 0; i < command.length(); i++) {
+							if(command.charAt(i) != cmd.charAt(i)) continue loop;
+						}
+						return true;						
+					}
+				}
+			}
+		}
+		return false;
 	}
 }

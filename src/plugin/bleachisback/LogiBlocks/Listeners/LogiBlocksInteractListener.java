@@ -66,24 +66,14 @@ public class LogiBlocksInteractListener implements Listener {
 				awaitingPlayers.remove(e.getPlayer());
 				return;
 			} else if(awaitingPlayers.get(e.getPlayer()).getType() == Material.COMMAND) {
-				for(String perm : plugin.getConfig().getConfigurationSection("permissions").getKeys(false)) {
-					if(e.getPlayer().hasPermission("c.permission." + perm)) {
-						loop: for(String command : plugin.getConfig().getStringList("permissions." + perm)) {
-							command = command.replace("/", "");
-							if(e.getMessage().length() > command.length()) {
-								for(int i = 0; i < command.length(); i++) {
-									if(command.charAt(i) != e.getMessage().charAt(i)) continue loop;
-								}
-								BlockState state = awaitingPlayers.get(e.getPlayer()).getState();
-								((CommandBlock) state).setCommand(e.getMessage());
-								state.update();
-								e.getPlayer().sendMessage(ChatColor.GREEN + "Command set to " + ChatColor.GRAY + e.getMessage());
-								return;
-							}
-						}
-					}
+				if(!plugin.commandAllowed(e.getPlayer(), e.getMessage())) {
+					e.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission to do that!");
+					return;
 				}
-				e.getPlayer().sendMessage(ChatColor.DARK_RED + "You don't have permission to do that!");
+				BlockState state = awaitingPlayers.get(e.getPlayer()).getState();
+				((CommandBlock) state).setCommand(e.getMessage());
+				state.update();
+				e.getPlayer().sendMessage(ChatColor.GREEN + "Command set to " + ChatColor.GRAY + e.getMessage());
 			} else {
 				e.getPlayer().sendMessage(ChatColor.RED + "The command block doesn't exist anymore!");
 			}
